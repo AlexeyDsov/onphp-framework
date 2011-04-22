@@ -282,7 +282,15 @@
 				case HttpMethod::POST:
 					$options[CURLOPT_POST] = true;
 					$options[CURLOPT_POSTFIELDS] =
-					$this->argumentsToString($request->getPost());
+						$this->argumentsToString($request->getPost());
+
+					if ($files = $request->getFiles()) {
+						$filename = reset($files);
+						Assert::isTrue(file_exists($filename), "File {$filename} doesn't exists");
+						$options[CURLOPT_INFILESIZE] = filesize($filename);
+						$descriptor = fopen($filename, 'r');
+						$options[CURLOPT_INFILE] = $descriptor;
+					}
 					break;
 					
 				default:
