@@ -349,30 +349,6 @@
 			return $this;
 		}
 
-		/**
-		 * @param string $filePath
-		 * @return resource
-		**/
-		protected function getDescriptor($filePath)
-		{
-			$descriptor = fopen($filePath, 'r');
-			$this->fileDescriptors[] = $descriptor;
-			return $descriptor;
-		}
-
-		/**
-		 * @return $this
-		**/
-		protected function closeFileDescriptors()
-		{
-			foreach ($this->fileDescriptors as $descriptor) {
-				fclose($descriptor);
-			}
-			$this->fileDescriptors = array();
-			
-			return $this;
-		}
-
 		private function argumentsToString($array)
 		{
 			Assert::isArray($array);
@@ -390,6 +366,30 @@
 			}
 			
 			return implode('&', $result);
+		}
+
+		/**
+		 * @param string $filePath
+		 * @return resource
+		**/
+		private function getDescriptor($filePath)
+		{
+			$descriptor = fopen($filePath, 'r');
+			$this->fileDescriptors[] = $descriptor;
+			return $descriptor;
+		}
+
+		/**
+		 * @return CurlHttpClient
+		**/
+		private function closeFileDescriptors()
+		{
+			foreach ($this->fileDescriptors as $descriptor) {
+				fclose($descriptor);
+			}
+			$this->fileDescriptors = array();
+			
+			return $this;
 		}
 	}
 ?>
