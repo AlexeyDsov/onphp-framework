@@ -23,6 +23,7 @@
 		private $multiRequests = array();
 		private $multiResponses = array();
 		private $multiThreadOptions = array();
+		private $fileDescriptors = array();
 		
 		/**
 		 * @return CurlHttpClient
@@ -192,6 +193,7 @@
 			$handle = $this->makeHandle($request, $response);
 			
 			if (curl_exec($handle) === false) {
+				$this->closeFileDescriptors();
 				$code = curl_errno($handle);
 				throw new NetworkException(
 					'curl error, code: '.$code
@@ -203,6 +205,8 @@
 			$this->makeResponse($handle, $response);
 			
 			curl_close($handle);
+			
+			$this->closeFileDescriptors();
 			
 			return $response;
 		}
@@ -242,6 +246,7 @@
 			}
 			
 			curl_multi_close($mh);
+			$this->closeFileDescriptors();
 			
 			return true;
 		}
@@ -285,11 +290,10 @@
 						$this->argumentsToString($request->getPost());
 
 					if ($files = $request->getFiles()) {
-						$filename = reset($files);
-						Assert::isTrue(file_exists($filename), "File {$filename} doesn't exists");
-						$options[CURLOPT_INFILESIZE] = filesize($filename);
-						$descriptor = fopen($filename, 'r');
-						$options[CURLOPT_INFILE] = $descriptor;
+						$filePath = reset($files);
+						Assert::isTrue(file_exists($filePath), "File {$filePath} doesn't exists");
+						$options[CURLOPT_INFILESIZE] = filesize($filePath);
+						$options[CURLOPT_INFILE] = $this->getDescriptor($filePath);
 					}
 					break;
 					
@@ -344,7 +348,31 @@
 			
 			return $this;
 		}
-		
+
+		/**
+		 * @param string $filePath
+		 * @return resource
+		**/
+		protected function getDescriptor($filePath)
+		{
+			$descriptor = fopen($filePath, 'r');
+			$this->fileDescriptors[] = $descriptor;
+			return $descriptor;
+		}
+
+		/**
+		 * @return $this
+		**/
+		protected function closeFileDescriptors()
+		{
+			foreach ($this->fileDescriptors as $descriptor) {
+				fclose($descriptor);
+			}
+			$this->fileDescriptors = array();
+			
+			return $this;
+		}
+
 		private function argumentsToString($array)
 		{
 			Assert::isArray($array);
