@@ -112,11 +112,11 @@ EOT;
 {$classHint}
 public function {$methodName}()
 {
-	if (!\$this->{$name} && \$this->{$name}Id) {
-		\$this->{$name} = {$fetchObjectString};
+	if (\$this->{$name}Id !== null) {
+		return {$fetchObjectString};
 	}
 	
-	return \$this->{$name};
+	return null;
 }
 
 public function {$methodName}Id()
@@ -227,7 +227,6 @@ EOT;
 **/
 public function {$methodName}({$this->className} \${$name})
 {
-	\$this->{$name} = \${$name};
 	\$this->{$name}Id = \${$name}->getId();
 
 	return \$this;
@@ -238,7 +237,6 @@ public function {$methodName}({$this->className} \${$name})
 **/
 public function {$methodName}Id(\$id)
 {
-	\$this->{$name} = null;
 	\$this->{$name}Id = \$id;
 
 	return \$this;
@@ -305,7 +303,6 @@ EOT;
 **/
 public function {$methodName}()
 {
-	\$this->{$name} = null;
 	\$this->{$name}Id = null;
 
 	return \$this;
