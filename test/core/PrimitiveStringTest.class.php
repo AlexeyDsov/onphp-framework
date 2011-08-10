@@ -14,8 +14,6 @@
 			try {
 				$primitive->importValue(new stdClass());
 			} catch (BaseException $e) {
-				var_dump(get_class($e), $e->getMessage(), $e->getFile(), $e->getLine(), $e->getTraceAsString());
-				exit;
 				/* all ok */
 			}
 		}
