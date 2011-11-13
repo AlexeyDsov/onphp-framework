@@ -79,7 +79,12 @@
 				}
 			}
 			
-			return $out."\n);\n";
+			$out .= "\n)";
+			if ($dialect instanceof MyDialect) {
+				$out .= ' TYPE=innodb ';
+			}
+			
+			return $out.";\n";
 		}
 	}
 ?>

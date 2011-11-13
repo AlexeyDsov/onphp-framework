@@ -35,6 +35,7 @@
 		 * flag to indicate whether we're in transaction
 		**/
 		private $transaction	= false;
+		private $transactionList = array();
 		
 		private $queue			= array();
 		private $toQueue		= false;
@@ -65,6 +66,9 @@
 			}
 		}
 		
+		/**
+		 * @return Dialect
+		 */
 		public static function getDialect()
 		{
 			throw new UnimplementedFeatureException('implement me, please');
@@ -111,20 +115,27 @@
 			/* AccessMode */ $mode = null
 		)
 		{
-			$begin = 'begin';
-			
-			if ($level && $level instanceof IsolationLevel)
-				$begin .= ' '.$level->toString();
-			
-			if ($mode && $mode instanceof AccessMode)
-				$begin .= ' '.$mode->toString();
+			if (!$this->transaction) {
+				$begin = 'begin';
 
-			if ($this->toQueue)
-				$this->queue[] = $begin;
-			else
-				$this->queryRaw("{$begin};\n");
-			
-			$this->transaction = true;
+				if ($level && $level instanceof IsolationLevel)
+					$begin .= ' '.$level->toString();
+
+				if ($mode && $mode instanceof AccessMode)
+					$begin .= ' '.$mode->toString();
+
+				if ($this->toQueue)
+					$this->queue[] = $begin;
+				else
+					$this->queryRaw("{$begin};\n");
+
+				$this->transaction = true;
+			} else {
+				$deep = count($this->transactionList) + 1;
+				$savepointName = 'onPHP_inTransaction'.$deep;
+				$this->savePoint($savepointName);
+				array_push($this->transactionList, $savepointName);
+			}
 			
 			return $this;
 		}
@@ -134,12 +145,16 @@
 		**/
 		public function commit()
 		{
-			if ($this->toQueue)
-				$this->queue[] = 'commit;';
-			else
-				$this->queryRaw("commit;\n");
-			
-			$this->transaction = false;
+			if (empty($this->transactionList)) {
+				if ($this->toQueue)
+					$this->queue[] = 'commit;';
+				else
+					$this->queryRaw("commit;\n");
+				$this->transaction = false;
+			} else {
+				$savepointName = array_pop($this->transactionList);
+				$this->releaseSavepoint($savepointName);
+			}
 			
 			return $this;
 		}
@@ -149,12 +164,17 @@
 		**/
 		public function rollback()
 		{
-			if ($this->toQueue)
-				$this->queue[] = 'rollback;';
-			else
-				$this->queryRaw("rollback;\n");
-			
-			$this->transaction = false;
+			if (empty($this->transactionList)) {
+				if ($this->toQueue)
+					$this->queue[] = 'rollback;';
+				else
+					$this->queryRaw("rollback;\n");
+				
+				$this->transaction = false;
+			} else {
+				$savepointName = array_pop($this->transactionList);
+				$this->rollbackToSavepoint($savepointName);
+			}
 			
 			return $this;
 		}
@@ -164,6 +184,54 @@
 			return $this->transaction;
 		}
 		//@}
+		
+		/**
+		 * @param string $savePoint
+		 * @return DB 
+		**/
+		public function savePoint($savePoint)
+		{
+//			$savePoint = $this->getDialect()->toFieldString($savePoint);
+			$savepoint = "savepoint {$savePoint};";
+			if ($this->toQueue)
+				$this->queue[] = $savepoint;
+			else
+				$this->queryRaw("{$savepoint}\n");
+				
+			return $this;
+		}
+		
+		/**
+		 * @param string $savePoint
+		 * @return DB 
+		**/
+		public function releaseSavepoint($savePoint)
+		{
+//			$savePoint = $this->getDialect()->toFieldString($savePoint);
+			$releaseSavepoint = "release savepoint {$savePoint};";
+			if ($this->toQueue)
+				$this->queue[] = $releaseSavepoint;
+			else
+				$this->queryRaw("{$releaseSavepoint}\n");
+				
+			return $this;
+		}
+		
+		/**
+		 * @param string $savePoint
+		 * @return DB 
+		**/
+		public function rollbackToSavepoint($savePoint)
+		{
+//			$savePoint = $this->getDialect()->toFieldString($savePoint);
+			$releaseSavepoint = "rollback to savepoint {$savePoint};";
+			if ($this->toQueue)
+				$this->queue[] = $releaseSavepoint;
+			else
+				$this->queryRaw("{$releaseSavepoint}\n");
+				
+			return $this;
+		}
 		
 		/**
 		 * queue handling

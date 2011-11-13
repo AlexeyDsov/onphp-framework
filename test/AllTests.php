@@ -127,6 +127,7 @@
 			}
 			
 			$suite->addTestSuite('DAOTest');
+			$suite->addTestSuite('TransactionTest');
 			
 			return $suite;
 		}
