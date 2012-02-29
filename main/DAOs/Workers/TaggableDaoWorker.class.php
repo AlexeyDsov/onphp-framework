@@ -112,7 +112,7 @@
 					$expires
 				);
 
-			SemaphorePool::me()->free(self::LOCK_PREFIX.$key);
+//			SemaphorePool::me()->free(self::LOCK_PREFIX.$key);
 
 			return $object;
 		}
@@ -162,7 +162,7 @@
 					$expires
 				);
 
-			SemaphorePool::me()->free(self::LOCK_PREFIX.$key);
+//			SemaphorePool::me()->free(self::LOCK_PREFIX.$key);
 
 			return $array;
 		}
@@ -301,34 +301,34 @@
 				return $result['data'];
 			}
 
-			$pool = SemaphorePool::me();
-
-			if (!$pool->get(self::LOCK_PREFIX.$key)) {
-				if ($result && isset($result['data'])) {
-					return $result['data'];
-				} else {
-					for ($msec = 0; $msec <= self::LOCK_TIMEOUT; $msec += 200) {
-						usleep(200*1000);
-						if ($pool->get(self::LOCK_PREFIX.$key)) {
-							$result =
-								Cache::me()->mark($this->className)->get($key);
-
-							$pool->free(self::LOCK_PREFIX.$key);
-
-							if ($this->checkValid($result)) {
-								return $result['data'];
-							} else {
-								// лока уже нет, а кэш не перестроился
-								break;
-							}
-						}
-					}
-					// не дождались снятия лока
-					throw new DeadLockException(
-						"Cache deadlock. {$this->className} QueryKey={$key}"
-					);
-				}
-			}
+//			$pool = SemaphorePool::me();
+//
+//			if (!$pool->get(self::LOCK_PREFIX.$key)) {
+//				if ($result && isset($result['data'])) {
+//					return $result['data'];
+//				} else {
+//					for ($msec = 0; $msec <= self::LOCK_TIMEOUT; $msec += 200) {
+//						usleep(200*1000);
+//						if ($pool->get(self::LOCK_PREFIX.$key)) {
+//							$result =
+//								Cache::me()->mark($this->className)->get($key);
+//
+//							$pool->free(self::LOCK_PREFIX.$key);
+//
+//							if ($this->checkValid($result)) {
+//								return $result['data'];
+//							} else {
+//								// лока уже нет, а кэш не перестроился
+//								continue;
+//							}
+//						}
+//					}
+//					// не дождались снятия лока
+//					throw new DeadLockException(
+//						"Cache deadlock. {$this->className} QueryKey={$key}"
+//					);
+//				}
+//			}
 
 			return null;
 		}
