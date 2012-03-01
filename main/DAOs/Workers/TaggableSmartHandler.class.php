@@ -14,7 +14,7 @@
 	 */
 	class TaggableSmartHandler implements TaggableHandler
 	{
-		const ID_POSTFIX = '_id_';
+		const ID_POSTFIX = '|id|';
 
 		public function getCacheObjectTags(IdentifiableObject $object, $className)
 		{
@@ -57,7 +57,10 @@
 
 			$tagList = array();
 			if ($query->getTablesCount() > 1 || !$this->isLazy($className)) {
-				$tagList = $this->getDefaultTags($className);
+				foreach ($query->getJoinedTables() as $table) {
+					/* @var $table SQLRealTableName */
+					$tagList[] = $table->getRealTable();
+				}
 			} else {
 				foreach ($query->getWhere() as $whereObject) {
 					if ($whereObject instanceof BinaryExpression) {
@@ -75,11 +78,12 @@
 						}
 					}
 				}
+				
+				if (empty($tagList)) {
+					$tagList = $this->getDefaultTags($className);
+				}
 			}
 
-			if (empty($tagList)) {
-				$tagList = $this->getDefaultTags($className);
-			}
 
 			return $tagList;
 		}
@@ -94,79 +98,64 @@
 
 		public function getDefaultTags($className)
 		{
-			return array($className);
+			return array($this->getTableByClassName($className));
 		}
 
 		protected function getTagByClassAndId($className, $id)
 		{
-			return $className.self::ID_POSTFIX.$id;
+			return $this->getTableByClassName($className).self::ID_POSTFIX.$id;
 		}
 
-		protected function getTagByBinaryExpression(BinaryExpression $expression, SelectQuery $query, &$className, &$columns)
+		protected final function getTagByBinaryExpression(BinaryExpression $expression, SelectQuery $query, &$className, &$columns)
 		{
 			$tag = null;
 
 			if ($expression->getLogic() == BinaryExpression::EQUALS) {
-				$left = $expression->getLeft();
-				$right = $expression->getRight();
+				$first = $expression->getLeft();
+				$second = $expression->getRight();
+				if ($second instanceof DBField || $first instanceof DBValue) {
+					$first = $expression->getRight();
+					$second = $expression->getLeft();
+				}
+				
 				$columnClassName = null;
 				$idValue = null;
 				if (
-					$left instanceof DBField
-					&& isset($columns[$left->getField()])
+					$first instanceof DBField
+					&& isset($columns[$first->getField()])
 				) {
-					if ($left->getTable() === null) {
+					if ($first->getTable() === null) {
 						$table = $query->getFirstTable();
-					} elseif ($left->getTable() instanceof FromTable) {
-						$table = $left->getTable();
+					} elseif ($first->getTable() instanceof FromTable) {
+						$table = $first->getTable();
 					}
 					if ($table instanceof FromTable) {
 						$table = $table->getTable();
 					}
 
 					if ($table !== null && $table == $this->getTableByClassName($className)) {
-						$columnClassName = $columns[$left->getField()];
+						$columnClassName = $columns[$first->getField()];
 					}
-				} elseif (is_string($left) && $left && isset($columns[$left])) {
+				} elseif (is_string($first) && $first && isset($columns[$first])) {
 					$table = $query->getFirstTable();
 					if ($table instanceof FromTable) {
 						$table = $table->getTable();
 					}
 					if ($table !== null && $table == $this->getTableByClassName($className)) {
-						$columnClassName = $columns[$left];
+						$columnClassName = $columns[$first];
 					}
 				}
 
-				if ($right instanceof DBValue) {
-					$idValue = $right->getValue();
-				} elseif ((is_integer($right) || is_string($right)) && $right) {
-					$idValue = $right;
+				if ($second instanceof DBValue) {
+					$idValue = $second->getValue();
+				} elseif ((is_integer($second) || is_string($second)) && $second) {
+					$idValue = $second;
 				}
 
 				if ($columnClassName && $idValue) {
 					$tag = $this->getTagByClassAndId($columnClassName, $idValue);
 				}
 			}
-
-			/*
-			if (
-				(
-					($left = $expression->getLeft()) instanceof DBField
-					&& (
-						$left->getTable() === null
-						|| (
-							$left->getTable() instanceof FromTable
-							&& $left->getTable()->getTable() == $this->getTableByClassName($className)
-						)
-					)
-					&& isset($columns[$left->getField()])
-				)
-				&& $expression->getLogic() == BinaryExpression::EQUALS
-				&& $expression->getRight() instanceof DBValue
-			) {
-				$tag = $this->getTagByClassAndId($columns[$left->getField()], $expression->getRight()->getValue());
-			}
-			*/
 
 			return $tag;
 		}
@@ -177,9 +166,6 @@
 			if (!isset($result[$className])) {
 				$columnList = array();
 				foreach ($this->getPropertiesByClassName($className) as $name => $lightMeta) {
-					if ($name == 'id') {
-						continue;
-					}
 					switch ($lightMeta->getType()) {
 						case 'identifierList':
 						case 'identifier':
@@ -197,14 +183,12 @@
 				return $result[$className];
 			}
 		}
-
-		protected function getTableByClassName($className)
-		{
-			static $result = array();
-			if (!isset($result[$className])) {
-				return $result[$className] = ClassUtils::callStaticMethod($className.'::dao')->getTable();
+		
+		protected function getTableByClassName($className) {
+			if (ClassUtils::isInstanceOf($className, 'DAOConnected')) {
+				return ClassUtils::callStaticMethod("{$className}::dao")->getTable();
 			} else {
-				return $result[$className];
+				return $className.'|className|';
 			}
 		}
 

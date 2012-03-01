@@ -214,13 +214,9 @@
 			foreach ($ids as $id)
 				$prefixed[$id] = $this->makeIdKey($id);
 
-			$cachedList =
-				Cache::me()->
-					mark($this->className)->
-					getList($prefixed);
-
 			if (
 				$cachedList
+					= Cache::me()->mark($this->className)->getList($prefixed)
 			) {
 				foreach ($cachedList as $cached) {
 					if ($this->checkValid($cached)) {
@@ -237,24 +233,15 @@
 			$toFetch += array_keys($prefixed);
 
 			if ($toFetch) {
-				try {
-					$list =
-						array_merge(
-							$list,
-							$this->getListByLogic(
-								Expression::in(
-									new DBField(
-										$this->dao->getIdName(),
-										$this->dao->getTable()
-									),
-									$toFetch
-								),
-								$expires
-							)
-						);
-				} catch (ObjectNotFoundException $e) {
-					// nothing to fetch
+				$remainList = array();
+				
+				foreach ($toFetch as $id) {
+					try {
+						$remainList[] = $this->getById($id);
+					} catch (ObjectNotFoundException $e) {/*_*/}
 				}
+				
+				$list = array_merge($list, $remainList);
 			}
 
 			$proto->endPrefetch($list);
