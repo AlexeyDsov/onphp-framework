@@ -18,8 +18,7 @@
 
 		public function getCacheObjectTags(IdentifiableObject $object, $className)
 		{
-			$tags = array($this->getTagByClassAndId($className, $object->getId()));
-			return $tags;
+			return array($this->getTagByClassAndId($className, $object->getId()));
 		}
 
 		public function getUncacheObjectTags(IdentifiableObject $object, $className)
@@ -27,22 +26,22 @@
 			$tags = $this->getCacheObjectTags($object, $className);
 			$tags = array_merge($this->getDefaultTags($className), $tags);
 
-			foreach ($object->proto()->getPropertyList() as $name => $lightMeta) {
+			foreach ($object->proto()->getPropertyList() as $name => $property) {
 				if ($name == 'id') {
 					continue;
 				}
-				if ($lightMeta->getClassName()) {
-					if ($lightMeta->getFetchStrategyId() == FetchStrategy::LAZY) {
-						if ($linkedObjectId = $object->{$lightMeta->getGetter().'Id'}()) {
-							$tags[] = $this->getTagByClassAndId($lightMeta->getClassName(), $linkedObjectId);
+				if ($property->getClassName()) {
+					if ($property->getFetchStrategyId() == FetchStrategy::LAZY) {
+						if ($linkedObjectId = $object->{$property->getGetter().'Id'}()) {
+							$tags[] = $this->getTagByClassAndId($property->getClassName(), $linkedObjectId);
 						}
-					} elseif ($lightMeta->getFetchStrategyId() == FetchStrategy::CASCADE) {
+					} elseif ($property->getFetchStrategyId()) {
 						if (
-							($linkedObject = $object->{$lightMeta->getGetter()}())
+							($linkedObject = $object->{$property->getGetter()}())
 							&& $linkedObject instanceof IdentifiableObject
 							&& $linkedObjectId = $linkedObject->getId()
 						) {
-							$tags[] = $this->getTagByClassAndId($lightMeta->getClassName(), $linkedObjectId);
+							$tags[] = $this->getTagByClassAndId($property->getClassName(), $linkedObjectId);
 						}
 					}
 				}
