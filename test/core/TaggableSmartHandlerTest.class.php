@@ -73,6 +73,22 @@
 			);
 		}
 		
+		public function testTableLazyThroughValueObject()
+		{
+			$criteria = Criteria::create(TestUserWithContact::dao())
+				->add(Expression::eq('contacts.city.id', DBValue::create('3')));
+			
+			$expectTags = array(
+				TestCity::dao()->getTable().TaggableSmartHandler::ID_POSTFIX.'3',
+			);
+			
+			$this->assertEquals(
+				$expectTags,
+				$this->spawnHandler()->getQueryTags($criteria->toSelectQuery(), 'TestUserWithContact')
+			);
+			
+		}
+		
 		public function testTableLazyListInCities()
 		{
 			$this->markTestIncomplete('Not implemented feature, but you can ;)');

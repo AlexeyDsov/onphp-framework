@@ -26,7 +26,7 @@
 			$tags = $this->getCacheObjectTags($object, $className);
 			$tags = array_merge($this->getDefaultTags($className), $tags);
 
-			foreach ($object->proto()->getPropertyList() as $name => $property) {
+			foreach ($this->getLinkProperties($className) as $name => $property) {
 				if ($name == 'id') {
 					continue;
 				}
@@ -164,23 +164,13 @@
 			static $result = array();
 			if (!isset($result[$className])) {
 				$columnList = array();
-				foreach ($this->getPropertiesByClassName($className) as $name => $lightMeta) {
-					switch ($lightMeta->getType()) {
-						case 'identifierList':
-						case 'identifier':
-						case 'integerIdentifier':
-						case 'scalarIdentifier':
-							if ($lightMeta->getClassName()) {
-								$columnList[$lightMeta->getColumnName()] = $lightMeta->getClassName();
-							}
-							break;
-					}
+				foreach ($this->getLinkProperties($className) as $property) {
+					/* @var $property LightMetaProperty */
+					$columnList[$property->getColumnName()] = $property->getClassName();
 				}
-
-				return $result[$className] = $columnList;
-			} else {
-				return $result[$className];
+				$result[$className] = $columnList;
 			}
+			return $result[$className];
 		}
 		
 		protected function getTableByClassName($className) {
@@ -193,7 +183,7 @@
 
 		protected function isLazy($className)
 		{
-			foreach ($this->getPropertiesByClassName($className) as $property) {
+			foreach ($this->getLinkProperties($className) as $property) {
 				if (
 					$property->getRelationId() == MetaRelation::ONE_TO_ONE
 					&& ($property->getFetchStrategyId() == FetchStrategy::CASCADE
@@ -204,6 +194,30 @@
 			}
 
 			return true;
+		}
+		
+		protected function getLinkProperties($className) {
+			$propertyList = array();
+			foreach ($this->getPropertiesByClassName($className) as $name => $property) {
+				if ($property instanceof InnerMetaProperty) {
+					$propertyList = array_merge(
+						$propertyList,
+						$this->getLinkProperties($property->getClassName())
+					);
+				} elseif ($property instanceof LightMetaProperty) {
+					switch ($property->getType()) {
+						case 'identifierList':
+						case 'identifier':
+						case 'integerIdentifier':
+						case 'scalarIdentifier':
+							if ($property->getClassName()) {
+								$propertyList[] = $property;
+							}
+							break;
+					}
+				}
+			}
+			return $propertyList;
 		}
 
 		protected function getPropertiesByClassName($className)
