@@ -185,6 +185,7 @@
 				'time'			=> DataType::TIME,
 				'date'			=> DataType::DATE,
 				'timestamp'		=> DataType::TIMESTAMP,
+				'timestamp with time zone'		=> DataType::TIMESTAMPTZ,
 				
 				'bool'			=> DataType::BOOLEAN,
 				

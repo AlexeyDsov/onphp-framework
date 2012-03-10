@@ -20,9 +20,9 @@
 	**/
 	class Timestamp extends Date
 	{
-		private $hour		= null;
-		private $minute		= null;
-		private $second		= null;
+		protected $hour		= null;
+		protected $minute	= null;
+		protected $second	= null;
 		
 		/**
 		 * @return Timestamp

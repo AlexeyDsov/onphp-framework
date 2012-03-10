@@ -12,11 +12,9 @@
 	/**
 	 * @ingroup Primitives
 	**/
-	class PrimitiveTimestamp extends PrimitiveDate
+	final class PrimitiveTimestampTZ extends PrimitiveTimestamp
 	{
-		const HOURS		= 'hrs';
-		const MINUTES	= 'min';
-		const SECONDS	= 'sec';
+		const ZONE = 'zone';
 		
 		public function importMarried($scope)
 		{
@@ -25,23 +23,22 @@
 				&& isset(
 					$scope[$this->name][self::DAY],
 					$scope[$this->name][self::MONTH],
-					$scope[$this->name][self::YEAR]
+					$scope[$this->name][self::YEAR],
+					$scope[$this->name][self::HOURS],
+					$scope[$this->name][self::MINUTES],
+					$scope[$this->name][self::SECONDS],
+					$scope[$this->name][self::ZONE]
 				)
 				&& is_array($scope[$this->name])
 			) {
 				if ($this->isEmpty($scope))
 					return !$this->isRequired();
 				
-				$hours = $minutes = $seconds = 0;
+				$zone = $scope[$this->name][self::ZONE];
 				
-				if (isset($scope[$this->name][self::HOURS]))
-					$hours = (int) $scope[$this->name][self::HOURS];
-				
-				if (isset($scope[$this->name][self::MINUTES]))
-					$minutes = (int) $scope[$this->name][self::MINUTES];
-				
-				if (isset($scope[$this->name][self::SECONDS]))
-					$seconds = (int) $scope[$this->name][self::SECONDS];
+				$hours = (int) $scope[$this->name][self::HOURS];
+				$minutes = (int) $scope[$this->name][self::MINUTES];
+				$seconds = (int) $scope[$this->name][self::SECONDS];
 				
 				$year = (int) $scope[$this->name][self::YEAR];
 				$month = (int) $scope[$this->name][self::MONTH];
@@ -51,11 +48,16 @@
 					return false;
 				
 				try {
-					$stamp = new Timestamp(
+					$stamp = new TimestampTZ(
 						$year.'-'.$month.'-'.$day.' '
 						.$hours.':'.$minutes.':'.$seconds
+						.' '.$zone
 					);
+					print $year.'-'.$month.'-'.$day.' '
+						.$hours.':'.$minutes.':'.$seconds
+						.' '.$zone."\n";
 				} catch (WrongArgumentException $e) {
+					var_dump(get_class($e), $e->getMessage(), $e->getCode(), $e->getFile(), $e->getLine(), $e->getTraceAsString());
 					// fsck wrong stamps
 					return false;
 				}
@@ -71,7 +73,7 @@
 		
 		protected function getObjectName()
 		{
-			return 'Timestamp';
+			return 'TimestampTZ';
 		}
 	}
 ?>
