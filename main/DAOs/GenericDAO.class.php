@@ -362,7 +362,9 @@
 			$db = DBPool::getByDao($this);
 			
 			if (!$db->isQueueActive()) {
-				$this->uncacheById($object->getId());
+				if (is_scalar($object->getId()))
+					$this->uncacheById($object->getId());
+				
 				$count = $db->queryCount($query);
 				
 				$this->uncacheById($object->getId());
@@ -373,7 +375,8 @@
 						.$query->toDialectString($db->getDialect())
 					);
 			} else {
-				$this->uncacheById($object->getId());
+				if (is_scalar($object->getId()))
+					$this->uncacheById($object->getId());
 				
 				$db->queryNull($query);
 				
