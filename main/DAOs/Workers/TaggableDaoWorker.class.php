@@ -323,9 +323,6 @@
 		protected function baseUncacheById($id)
 		{
 			try {
-				if ($object = $this->getCachedById($id)) {
-					$this->updateTagVersions($object);
-				}
 				$object = $this->dao->getById($id);
 				$this->updateTagVersions($object);
 			} catch (ObjectNotFoundException $e) {
