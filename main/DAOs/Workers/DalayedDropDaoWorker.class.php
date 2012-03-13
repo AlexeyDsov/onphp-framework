@@ -30,6 +30,14 @@
 			return true;
 		}
 		
+		/**
+		 * @param mixed $id
+		 * @return Closure
+		 */
+		public function getUncacheByIdFunc($id) {
+			return function() {};
+		}
+		
 		public function dropWith($worker)
 		{
 			Assert::classExists($worker);

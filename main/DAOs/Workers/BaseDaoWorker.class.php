@@ -84,9 +84,19 @@
 		//@{
 		public function uncacheById($id)
 		{
-			return
-				Cache::me()->mark($this->className)->
-					delete($this->makeIdKey($id));
+			$uncacheFunc = $this->getUncacheByIdFunc($id);
+			return $uncacheFunc();
+		}
+		
+		/**
+		 * @return Closure
+		 */
+		public function getUncacheByIdFunc($id) {
+			$className = $this->className;
+			$idKey = $this->makeIdKey($id);
+			return function() use ($className, $idKey) {
+				return Cache::me()->mark($className)->delete($idKey);
+			};
 		}
 		
 		public function uncacheByQuery(SelectQuery $query)

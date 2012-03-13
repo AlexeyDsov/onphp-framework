@@ -254,15 +254,41 @@
 		//@{
 		public function uncacheById($id)
 		{
-			$this->baseUncacheById($id);
+			$function = $this->getUncacheByIdFunc($id);
+			$function();
 
-			return	$this->dao->uncacheLists();
+			return $this->dao->uncacheLists();
+		}
+		
+		/**
+		 * @return Closure
+		 */
+		public function getUncacheByIdFunc($id) {
+			$className = $this->className;
+			$idKey = $this->makeIdKey($id);
+			
+			try {
+				$object = $this->dao->getById($id);
+				$tags = self::$handler->getUncacheObjectTags($object, $className);
+			} catch (ObjectNotFoundException $e) {
+				$tags = array();
+			}
+			
+			$self = $this;
+			return function() use ($className, $idKey, $tags, $self) {
+				$self->expireTags($tags);
+				Cache::me()->
+					mark($className)->
+					delete($idKey);
+			};
 		}
 
 		public function uncacheByIds($ids)
 		{
-			foreach ($ids as $id)
-				$this->baseUncacheById($id);
+			foreach ($ids as $id) {
+				$function = $this->getUncacheByIdFunc($id);
+				$function();
+			}
 
 			return $this->dao->uncacheLists();
 		}
@@ -318,20 +344,6 @@
 //			}
 
 			return null;
-		}
-
-		protected function baseUncacheById($id)
-		{
-			try {
-				$object = $this->dao->getById($id);
-				$this->updateTagVersions($object);
-			} catch (ObjectNotFoundException $e) {
-				$object = null;
-			}
-
-			Cache::me()->
-				mark($this->className)->
-				delete($this->makeIdKey($id));
 		}
 
 		protected function checkValid($item)
