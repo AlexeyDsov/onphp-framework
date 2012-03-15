@@ -27,22 +27,29 @@
 			$tags = array_merge($this->getDefaultTags($className), $tags);
 
 			foreach ($this->getLinkProperties($className) as $name => $property) {
+				/* @var $property LightMetaProperty */
 				if ($name == 'id') {
 					continue;
 				}
 				if ($property->getClassName()) {
-					if ($property->getFetchStrategyId() == FetchStrategy::LAZY) {
-						if ($linkedObjectId = $object->{$property->getGetter().'Id'}()) {
-							$tags[] = $this->getTagByClassAndId($property->getClassName(), $linkedObjectId);
+					if ($property->getRelationId() == MetaRelation::ONE_TO_ONE) {
+						if ($property->getFetchStrategyId() == FetchStrategy::LAZY) {
+							if ($linkedObjectId = $object->{$property->getGetter().'Id'}()) {
+								$tags[] = $this->getTagByClassAndId($property->getClassName(), $linkedObjectId);
+							}
+						} elseif ($property->getFetchStrategyId()) {
+							if (
+								($linkedObject = $object->{$property->getGetter()}())
+								&& $linkedObject instanceof IdentifiableObject
+								&& $linkedObjectId = $linkedObject->getId()
+							) {
+								$tags[] = $this->getTagByClassAndId($property->getClassName(), $linkedObjectId);
+							}
 						}
-					} elseif ($property->getFetchStrategyId()) {
-						if (
-							($linkedObject = $object->{$property->getGetter()}())
-							&& $linkedObject instanceof IdentifiableObject
-							&& $linkedObjectId = $linkedObject->getId()
-						) {
-							$tags[] = $this->getTagByClassAndId($property->getClassName(), $linkedObjectId);
-						}
+					} elseif ($property->getRelationId() == MetaRelation::MANY_TO_MANY) {
+						$daoHelper = $object->{$property->getGetter()}();
+						/* @var $daoHelper ManyToManyLinked */
+						$tags[] = $daoHelper->getHelperTable();
 					}
 				}
 			}
@@ -82,7 +89,6 @@
 					$tagList = $this->getDefaultTags($className);
 				}
 			}
-
 
 			return $tagList;
 		}
@@ -166,7 +172,9 @@
 				$columnList = array();
 				foreach ($this->getLinkProperties($className) as $property) {
 					/* @var $property LightMetaProperty */
-					$columnList[$property->getColumnName()] = $property->getClassName();
+					if ($property->getRelationId() == MetaRelation::ONE_TO_ONE || $property->getName() == 'id') {
+						$columnList[$property->getColumnName()] = $property->getClassName();
+					}
 				}
 				$result[$className] = $columnList;
 			}
@@ -206,10 +214,12 @@
 					);
 				} elseif ($property instanceof LightMetaProperty) {
 					switch ($property->getType()) {
-						case 'identifierList':
 						case 'identifier':
+						case 'identifierList':
 						case 'integerIdentifier':
+						case 'integerIdentifierList':
 						case 'scalarIdentifier':
+						case 'scalarIdentifierList':
 							if ($property->getClassName()) {
 								$propertyList[] = $property;
 							}

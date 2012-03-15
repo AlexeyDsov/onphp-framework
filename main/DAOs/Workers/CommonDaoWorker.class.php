@@ -484,7 +484,7 @@
 		 * @return Closure
 		 */
 		public function getUncacheByIdFunc($id) {
-			$dao = $this->dao();
+			$dao = $this->dao;
 			$function = parent::getUncacheByIdFunc($id);
 			return function () use ($function, $dao) {
 				$dao->uncacheLists();
