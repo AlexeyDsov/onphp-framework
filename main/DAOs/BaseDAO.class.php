@@ -51,6 +51,10 @@
 		/// uncachers
 		//@{
 		public function uncacheById($id);
+		/**
+		 * @return Closure
+		 */
+		public function getUncacheByIdFunc($id);
 		public function uncacheByIds($ids);
 		public function uncacheLists();
 		//@}

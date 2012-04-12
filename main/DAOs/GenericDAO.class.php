@@ -301,9 +301,15 @@
 		
 		public function uncacheById($id)
 		{
+			$function = $this->getUncacheByIdFunc($id);
+			return $function();
+		}
+		
+		public function getUncacheByIdFunc($id)
+		{
 			unset($this->identityMap[$id]);
 			
-			return Cache::worker($this)->uncacheById($id);
+			return Cache::worker($this)->getUncacheByIdFunc($id);
 		}
 		
 		public function uncacheByIds($ids)
@@ -362,8 +368,15 @@
 			$db = DBPool::getByDao($this);
 			
 			if (!$db->isQueueActive()) {
+				$oldUncacheFunc = is_scalar($object->getId())
+					? $this->getUncacheByIdFunc($object->getId())
+					: null;
+				
 				$count = $db->queryCount($query);
 				
+				if ($oldUncacheFunc) {
+					$oldUncacheFunc();
+				}
 				$this->uncacheById($object->getId());
 				
 				if ($count !== 1)
@@ -372,8 +385,15 @@
 						.$query->toDialectString($db->getDialect())
 					);
 			} else {
+				$oldUncacheFunc = is_scalar($object->getId())
+					? $this->getUncacheByIdFunc($object->getId())
+					: null;
+				
 				$db->queryNull($query);
 				
+				if ($oldUncacheFunc) {
+					$oldUncacheFunc();
+				}
 				$this->uncacheById($object->getId());
 			}
 			

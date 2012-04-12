@@ -479,11 +479,17 @@
 		
 		/// uncachers
 		//@{
-		public function uncacheById($id)
-		{
-			$this->dao->uncacheLists();
-			
-			return parent::uncacheById($id);
+		
+		/**
+		 * @return Closure
+		 */
+		public function getUncacheByIdFunc($id) {
+			$dao = $this->dao;
+			$function = parent::getUncacheByIdFunc($id);
+			return function () use ($function, $dao) {
+				$dao->uncacheLists();
+				return $function();
+			};
 		}
 		
 		public function uncacheByIds($ids)

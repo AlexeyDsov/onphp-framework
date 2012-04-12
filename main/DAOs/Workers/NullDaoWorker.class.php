@@ -126,6 +126,13 @@
 			return true;
 		}
 		
+		/**
+		 * @return Closure
+		 */
+		public function getUncacheByIdFunc($id) {
+			return function() {};
+		}
+		
 		public function uncacheByIds($ids)
 		{
 			return true;
