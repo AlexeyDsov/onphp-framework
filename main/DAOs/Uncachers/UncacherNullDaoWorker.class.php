@@ -22,7 +22,7 @@
 		 * @param $uncacher UncacherNullDaoWorker same as self class
 		 * @return BaseUncacher (this)
 		 */
-		public function merge(BaseUncacher $uncacher)
+		public function merge(UncacherBase $uncacher)
 		{
 			Assert::isInstance($uncacher, 'UncacherNullDaoWorker');
 			return $this;

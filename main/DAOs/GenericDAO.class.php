@@ -354,7 +354,7 @@
 			return $this;
 		}
 		
-		public function registerWorkerUncacher(BaseUncacher $uncacher)
+		public function registerWorkerUncacher(UncacherBase $uncacher)
 		{
 			DBPool::getByDao($this)->registerUncacher($uncacher);
 		}

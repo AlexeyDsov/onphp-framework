@@ -35,7 +35,7 @@
 		 * @param $uncacher UncacherGenericDAO same as self class
 		 * @return UncacherBase (this)
 		 */
-		public function merge(BaseUncacher $uncacher)
+		public function merge(UncacherBase $uncacher)
 		{
 			Assert::isInstance($uncacher, 'UncacherGenericDAO');
 			return $this->mergeSelf($uncacher);

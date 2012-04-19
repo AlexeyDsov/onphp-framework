@@ -38,7 +38,7 @@
 		 * @param $uncacher UncacherNullDaoWorker same as self class
 		 * @return BaseUncacher (this)
 		 */
-		public function merge(BaseUncacher $uncacher)
+		public function merge(UncacherBase $uncacher)
 		{
 			Assert::isInstance($uncacher, get_class($this));
 			return $this->mergeSelf($uncacher);
@@ -48,7 +48,7 @@
 		{
 			foreach ($this->classNameMap as $className => $idKeys) {
 				foreach ($idKeys as $key) {
-					Cache::me()->mark($className)->delete($key);
+					$this->uncacheClassName($className, $idKeys);
 				}
 			}
 		}
