@@ -84,19 +84,18 @@
 		//@{
 		public function uncacheById($id)
 		{
-			$uncacheFunc = $this->getUncacheByIdFunc($id);
-			return $uncacheFunc();
+			return $this->getUncacherById($id)->uncache();
 		}
 		
 		/**
-		 * @return Closure
+		 * @return UncacherBase
 		 */
-		public function getUncacheByIdFunc($id) {
-			$className = $this->className;
-			$idKey = $this->makeIdKey($id);
-			return function() use ($className, $idKey) {
-				return Cache::me()->mark($className)->delete($idKey);
-			};
+		public function getUncacherById($id)
+		{
+			return UncacherBaseDaoWorker::create(
+				$this->className,
+				$this->makeIdKey($id)
+			);
 		}
 		
 		public function uncacheByQuery(SelectQuery $query)

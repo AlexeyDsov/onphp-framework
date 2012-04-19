@@ -481,23 +481,26 @@
 		//@{
 		
 		/**
-		 * @return Closure
+		 * @return UncacherBase
 		 */
-		public function getUncacheByIdFunc($id) {
-			$dao = $this->dao;
-			$function = parent::getUncacheByIdFunc($id);
-			return function () use ($function, $dao) {
-				$dao->uncacheLists();
-				return $function();
-			};
+		public function getUncacherById($id) {
+			return UncacherCommonDaoWorker::create(
+				$this->className,
+				$this->makeIdKey($id)
+			);
 		}
 		
 		public function uncacheByIds($ids)
 		{
-			foreach ($ids as $id)
-				parent::uncacheById($id);
+			if (empty($ids))
+				return;
 			
-			return $this->dao->uncacheLists();
+			$uncacher = $this->getUncacherById(array_shift($ids));
+			
+			foreach ($ids as $id)
+				$uncacher->merge($this->getUncacherById($id));
+			
+			return $uncacher->uncache();
 		}
 		
 		// quite useless here

@@ -32,10 +32,10 @@
 		
 		/**
 		 * @param mixed $id
-		 * @return Closure
+		 * @return UncacherBase
 		 */
-		public function getUncacheByIdFunc($id) {
-			return function() {};
+		public function getUncacherById($id) {
+			return UncacherNullDaoWorker::create();
 		}
 		
 		public function dropWith($worker)

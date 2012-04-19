@@ -52,9 +52,9 @@
 		//@{
 		public function uncacheById($id);
 		/**
-		 * @return Closure
+		 * @return UncacherBase
 		 */
-		public function getUncacheByIdFunc($id);
+		public function getUncacherById($id);
 		public function uncacheByIds($ids);
 		public function uncacheLists();
 		//@}

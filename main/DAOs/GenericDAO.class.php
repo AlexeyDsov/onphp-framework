@@ -301,23 +301,32 @@
 		
 		public function uncacheById($id)
 		{
-			$function = $this->getUncacheByIdFunc($id);
-			return $function();
+			return $this->getUncacherById($id)->uncache();
 		}
 		
-		public function getUncacheByIdFunc($id)
+		/**
+		 * @return UncachersPool
+		 */
+		public function getUncacherById($id)
 		{
-			unset($this->identityMap[$id]);
-			
-			return Cache::worker($this)->getUncacheByIdFunc($id);
+			return UncacherGenericDAO::create(
+				$this,
+				$id,
+				Cache::worker($this)->getUncacherById($id)
+			);
 		}
 		
 		public function uncacheByIds($ids)
 		{
-			foreach ($ids as $id)
-				unset($this->identityMap[$id]);
+			if (empty($ids))
+				return;
+				
+			$uncacher = $this->getUncacherById(array_shift($ids));
 			
-			return Cache::worker($this)->uncacheByIds($ids);
+			foreach ($ids as $id)
+				$uncacher->merge($this->getUncacherById($id));
+			
+			return $uncacher->uncache();
 		}
 		
 		public function uncacheLists()
@@ -368,16 +377,17 @@
 			$db = DBPool::getByDao($this);
 			
 			if (!$db->isQueueActive()) {
-				$oldUncacheFunc = is_scalar($object->getId())
-					? $this->getUncacheByIdFunc($object->getId())
+				$preUncacher = is_scalar($object->getId())
+					? $this->getUncacherById($object->getId())
 					: null;
 				
 				$count = $db->queryCount($query);
 				
-				if ($oldUncacheFunc) {
-					$oldUncacheFunc();
+				$uncacher = $this->getUncacherById($object->getId());
+				if ($preUncacher) {
+					$uncacher->merge($uncacher);
 				}
-				$this->uncacheById($object->getId());
+				$uncacher->uncache();
 				
 				if ($count !== 1)
 					throw new WrongStateException(
@@ -385,16 +395,17 @@
 						.$query->toDialectString($db->getDialect())
 					);
 			} else {
-				$oldUncacheFunc = is_scalar($object->getId())
-					? $this->getUncacheByIdFunc($object->getId())
+				$preUncacher = is_scalar($object->getId())
+					? $this->getUncacherById($object->getId())
 					: null;
 				
 				$db->queryNull($query);
 				
-				if ($oldUncacheFunc) {
-					$oldUncacheFunc();
+				$uncacher = $this->getUncacherById($object->getId());
+				if ($preUncacher) {
+					$uncacher->merge($uncacher);
 				}
-				$this->uncacheById($object->getId());
+				$uncacher->uncache();
 			}
 			
 			// clean out Identifier, if any

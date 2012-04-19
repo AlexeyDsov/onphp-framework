@@ -127,10 +127,10 @@
 		}
 		
 		/**
-		 * @return Closure
+		 * @return UncachersPool
 		 */
-		public function getUncacheByIdFunc($id) {
-			return function() {};
+		public function getUncacherById($id) {
+			return UncachersPool::create();
 		}
 		
 		public function uncacheByIds($ids)

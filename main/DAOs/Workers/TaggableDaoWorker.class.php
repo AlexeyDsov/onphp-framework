@@ -217,16 +217,13 @@
 		//@{
 		public function uncacheById($id)
 		{
-			$function = $this->getUncacheByIdFunc($id);
-			$function();
-
-			return $this->dao->uncacheLists();
+			return $this->getUncacherById($id)->uncache();
 		}
 		
 		/**
-		 * @return Closure
+		 * @return UncacherBase
 		 */
-		public function getUncacheByIdFunc($id) {
+		public function getUncacherById($id) {
 			$className = $this->className;
 			$idKey = $this->makeIdKey($id);
 			
@@ -237,23 +234,20 @@
 				$tags = array();
 			}
 			
-			$self = $this;
-			return function() use ($className, $idKey, $tags, $self) {
-				$self->expireTags($tags);
-				Cache::me()->
-					mark($className)->
-					delete($idKey);
-			};
+			return UncacherTaggableDaoWorker::create($className, $idKey, $tags, $worker);
 		}
 
 		public function uncacheByIds($ids)
 		{
-			foreach ($ids as $id) {
-				$function = $this->getUncacheByIdFunc($id);
-				$function();
-			}
-
-			return $this->dao->uncacheLists();
+			if (empty($ids))
+				return;
+			
+			$uncacher = $this->getUncacherById(array_shift($ids));
+			
+			foreach ($ids as $id)
+				$uncacher->merge($this->getUncacherById($id));
+			
+			return $uncacher->uncache();
 		}
 
 		public function uncacheLists()
