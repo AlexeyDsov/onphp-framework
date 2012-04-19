@@ -52,7 +52,7 @@
 				foreach ($dropIdentityIds as $id)
 					$dao->dropObjectIdentityMapById($id);
 				
-				$workerUncacher->uncache();
+				$dao->registerWorkerUncacher($workerUncacher);
 			}
 		}
 		

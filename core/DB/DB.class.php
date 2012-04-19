@@ -42,6 +42,10 @@
 		
 		private $queue			= array();
 		private $toQueue		= false;
+		/**
+		 * @var UncachersPool
+		 */
+		private $uncacher		= null;
 		
 		abstract public function connect();
 		abstract public function disconnect();
@@ -146,6 +150,8 @@
 			$this->transaction = false;
 			$this->savepointList = array();
 			
+			$this->triggerUncacher();
+			
 			return $this;
 		}
 		
@@ -161,6 +167,8 @@
 			
 			$this->transaction = false;
 			$this->savepointList = array();
+			
+			$this->triggerUncacher();
 			
 			return $this;
 		}
@@ -412,7 +420,7 @@
 				
 			$this->savepointList[$savepointName] = true;
 			return $this;
-		}
+			}
 		
 		/**
 		 * @param string $savepointName 
@@ -430,11 +438,35 @@
 		private function checkSavepointExist($savepointName)
 		{
 			return isset($this->savepointList[$savepointName]);
-		}
+			}
 		
 		private function assertSavePointName($savepointName)
 		{
 			Assert::isEqual(1, preg_match('~^[A-Za-z][A-Za-z0-9]*$~iu', $savepointName));
+		}
+		
+		public function registerUncacher(UncacherBase $uncacher)
+		{
+			$uncacher->uncache();
+			if ($this->inTransaction()) {
+				$this->getUncacher()->merge($uncacher);
+			}
+		}
+		
+		/**
+		 * @return UncachersPool
+		 */
+		private function getUncacher()
+		{
+			return $this->uncacher ?: UncachersPool::create();
+		}
+		
+		private function triggerUncacher()
+		{
+			if ($this->uncacher) {
+				$this->uncacher->uncache();
+				$this->uncacher = null;
+			}
 		}
 	}
 ?>

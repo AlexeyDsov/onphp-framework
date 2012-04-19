@@ -354,6 +354,11 @@
 			return $this;
 		}
 		
+		public function registerWorkerUncacher(BaseUncacher $uncacher)
+		{
+			DBPool::getByDao($this)->registerUncacher($uncacher);
+		}
+		
 		protected function inject(
 			InsertOrUpdateQuery $query,
 			Identifiable $object
