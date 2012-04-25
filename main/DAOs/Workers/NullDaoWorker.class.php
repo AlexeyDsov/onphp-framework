@@ -127,10 +127,10 @@
 		}
 		
 		/**
-		 * @return UncachersPool
+		 * @return UncacherNullDaoWorker
 		 */
 		public function getUncacherById($id) {
-			return UncachersPool::create();
+			return UncacherNullDaoWorker::create();
 		}
 		
 		public function uncacheByIds($ids)
