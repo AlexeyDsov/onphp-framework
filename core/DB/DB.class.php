@@ -46,6 +46,7 @@
 		 * @var UncachersPool
 		 */
 		private $uncacher		= null;
+		private $outOfTransactionCachePeer = null;
 		
 		abstract public function connect();
 		abstract public function disconnect();
@@ -134,6 +135,9 @@
 			
 			$this->transaction = true;
 			
+			$this->outOfTransactionCachePeer = Cache::getPeer();
+			Cache::setPeer(new RuntimeMemory());
+			
 			return $this;
 		}
 		
@@ -150,6 +154,7 @@
 			$this->transaction = false;
 			$this->savepointList = array();
 			
+			Cache::setPeer($this->outOfTransactionCachePeer);
 			$this->triggerUncacher();
 			
 			return $this;
@@ -168,6 +173,7 @@
 			$this->transaction = false;
 			$this->savepointList = array();
 			
+			Cache::setPeer($this->outOfTransactionCachePeer);
 			$this->triggerUncacher();
 			
 			return $this;
