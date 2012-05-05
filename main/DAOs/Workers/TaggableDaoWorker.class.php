@@ -234,7 +234,7 @@
 				$tags = array();
 			}
 			
-			return UncacherTaggableDaoWorker::create($className, $idKey, $tags, $worker);
+			return UncacherTaggableDaoWorker::create($className, $idKey, $tags, $this);
 		}
 
 		public function uncacheByIds($ids)
