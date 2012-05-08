@@ -464,7 +464,7 @@
 		 */
 		private function getUncacher()
 		{
-			return $this->uncacher ?: UncachersPool::create();
+			return $this->uncacher = $this->uncacher ?: UncachersPool::create();
 		}
 		
 		private function triggerUncacher()
