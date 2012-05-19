@@ -52,13 +52,15 @@
 		
 		public function fillQuery(
 			InsertOrUpdateQuery $query,
-			Prototyped $object
+			Prototyped $object,
+			Prototyped $old = null
 		)
 		{
 			return
 				$this->getProto()->fillQuery(
 					$query,
-					$object->{$this->getGetter()}()
+					$object->{$this->getGetter()}(),
+					$old ? $old->{$this->getGetter()} : null
 				);
 		}
 		
