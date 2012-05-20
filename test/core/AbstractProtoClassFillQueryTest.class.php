@@ -93,7 +93,7 @@
 			
 			$updateUser = $user->proto()->fillQuery(OSQL::update(), $user, $oldUser);
 			$this->assertEquals(
-				'',
+				'UPDATE  SET city_id = 2, first_optional_id = NULL, second_optional_id = 3, properties = "param"=>"value",',
 				$updateUser->toDialectString(ImaginaryDialect::me())
 			);
 		}

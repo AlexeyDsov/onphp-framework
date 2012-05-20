@@ -381,22 +381,21 @@
 						&& ($value === $oldValue)
 					) {
 						return $query;
-					} elseif ($this->relationId) {
-						if ($value === null && $oldValue === null) {
-							return $query;
-						} elseif ($value !== null && $oldValue !== null) {
-							if ($value->getId() === $oldValue->getId())
-								return $query;
-						}
 					} elseif (
-						!$this->relationId
-						&& ($value === $old->{$getter}())
+						$value instanceof Identifiable
+						&& $oldValue instanceof Identifiable
+						&& $value->getId() === $oldValue->getId()
 					) {
 						return $query;
 					} elseif (
 						$value instanceof Stringable
 						&& $oldValue instanceof Stringable
 						&& $value->toString() == $oldValue->toString()
+					) {
+						return $query;
+					} elseif (
+						!$this->relationId
+						&& ($value === $oldValue)
 					) {
 						return $query;
 					}
