@@ -217,12 +217,14 @@
 		)
 		{
 			if ($old) {
-				Assert::isNotNull($object->getId());
+				if ($object instanceof Identifiable) {
+					Assert::isNotNull($object->getId());
 
-				Assert::isTypelessEqual(
-					$object->getId(), $old->getId(),
-					'cannot merge different objects'
-				);
+					Assert::isTypelessEqual(
+						$object->getId(), $old->getId(),
+						'cannot merge different objects'
+					);
+				}
 			}
 			
 			foreach ($this->getPropertyList() as $property) {

@@ -5,7 +5,7 @@
 	 */
 	final class AbstractProtoClassFillQueryTest extends TestCase
 	{
-		public function testFillFullQueryByCity()
+		public function testFullInsertQueryByCity()
 		{
 			$city = $this->spawnCity();
 			
@@ -16,7 +16,7 @@
 			);
 		}
 		
-		public function testFillFullQueryByUser()
+		public function testFullUpdateQueryByUser()
 		{
 			$city = $this->spawnCity();
 			$user = $this->spawnUser(array('city' => $city));
@@ -32,7 +32,7 @@
 			);
 		}
 		
-		public function testFillFullQueryByUserWithContactExt()
+		public function testFullUpdateQueryByUserWithContactExt()
 		{
 			$contactValue = $this->spawnContactValueExt();
 			$user = $this->spawnUserWithContactExt(array('contactExt' => $contactValue));
@@ -46,7 +46,7 @@
 			);
 		}
 		
-		public function testfillDiffQueryByCityOneBoolean()
+		public function testUpdateQueryByCityOneBoolean()
 		{
 			$cityOld = $this->spawnCity(array('capital' => false));
 			$city = $this->spawnCity(array('capital' => true)); //1918
@@ -58,7 +58,7 @@
 			);
 		}
 		
-		public function testfillDiffQueryByCityOneString()
+		public function testUpdateQueryByCityOneString()
 		{
 			$cityOld = $this->spawnCity(array('name' => 'Leningrad'));
 			$city = $this->spawnCity(array('name' => 'Saint-Peterburg'));
@@ -67,6 +67,34 @@
 			$this->assertEquals(
 				'UPDATE  SET name = Saint-Peterburg',
 				$updateCity->toDialectString(ImaginaryDialect::me())
+			);
+		}
+		
+		public function testUpdateQueryByUserCitiesAndHstore()
+		{
+			$moscow = $this->spawnCity(array('id' => 1, 'name' => 'Moscow'));
+			$piter = $this->spawnCity(array('id' => 2, 'name' => 'Saint-Peterburg'));
+			$omsk = $this->spawnCity(array('id' => 3, 'name' => 'Omsk'));
+			
+			$userParams = array(
+				'city' => $moscow,
+				'firstOptional' => $piter,
+				'secondOptional' => null,
+				'properties' => Hstore::make(array()),
+			);
+			$oldUser = $this->spawnUser($userParams);
+			$userParams = array(
+				'city' => $piter,
+				'firstOptional' => null,
+				'secondOptional' => $omsk,
+				'properties' => Hstore::make(array('param' => 'value')),
+			);
+			$user = $this->spawnUser($userParams);
+			
+			$updateUser = $user->proto()->fillQuery(OSQL::update(), $user, $oldUser);
+			$this->assertEquals(
+				'',
+				$updateUser->toDialectString(ImaginaryDialect::me())
 			);
 		}
 		
@@ -92,7 +120,7 @@
 		{
 			$options += array(
 				'id' => '77',
-				'credentials' => null,
+				'credentials' => Credentials::create(),
 				'lastLogin' => Timestamp::create('2011-12-31'),
 				'registered' => Timestamp::create('2011-12-30'),
 				'strangeTime' => Time::create('01:23:45'),

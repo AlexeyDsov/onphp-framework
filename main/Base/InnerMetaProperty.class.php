@@ -60,7 +60,7 @@
 				$this->getProto()->fillQuery(
 					$query,
 					$object->{$this->getGetter()}(),
-					$old ? $old->{$this->getGetter()} : null
+					$old ? $old->{$this->getGetter()}() : null
 				);
 		}
 		

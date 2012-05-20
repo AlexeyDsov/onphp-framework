@@ -372,14 +372,16 @@
 
 				$value = $object->{$getter}();
 				if ($old) {
-					if (
+					$oldValue = $old->{$getter}();
+					if ($oldValue === null && $value === $oldValue) {
+						return $query;
+					} elseif (
 						$this->relationId
 						&& $this->strategyId == FetchStrategy::LAZY
-						&& ($value === $old->{$getter}())
+						&& ($value === $oldValue)
 					) {
 						return $query;
 					} elseif ($this->relationId) {
-						$oldValue = $old->{$getter}();
 						if ($value === null && $oldValue === null) {
 							return $query;
 						} elseif ($value !== null && $oldValue !== null) {
@@ -389,6 +391,12 @@
 					} elseif (
 						!$this->relationId
 						&& ($value === $old->{$getter}())
+					) {
+						return $query;
+					} elseif (
+						$value instanceof Stringable
+						&& $oldValue instanceof Stringable
+						&& $value->toString() == $oldValue->toString()
 					) {
 						return $query;
 					}
