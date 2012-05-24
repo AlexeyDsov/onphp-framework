@@ -70,6 +70,22 @@
 			);
 		}
 		
+		public function testUpdateQueryByUserTimesAndUrl()
+		{
+			$oldUser = $this->spawnUser(array(
+				'strangeTime' => Time::create('12:12:12'),
+				'url' => HttpUrl::create()->parse('http://code.google.com/'),
+			));
+			$user = $this->spawnUser(array('lastLogin' => Timestamp::create('2012-01-01')));
+			
+			$updateUser = $user->proto()->fillQuery(OSQL::update(), $user, $oldUser);
+			$this->assertEquals(
+				'UPDATE  SET very_custom_field_name = 2012-01-01 00:00:00, '
+					.'strange_time = 01:23:45, url = https://www.github.com',
+				$updateUser->toDialectString(ImaginaryDialect::me())
+			);
+		}
+		
 		public function testUpdateQueryByUserCitiesAndHstore()
 		{
 			$moscow = $this->spawnCity(array('id' => 1, 'name' => 'Moscow'));
@@ -93,7 +109,39 @@
 			
 			$updateUser = $user->proto()->fillQuery(OSQL::update(), $user, $oldUser);
 			$this->assertEquals(
-				'UPDATE  SET city_id = 2, first_optional_id = NULL, second_optional_id = 3, properties = "param"=>"value",',
+				'UPDATE  SET city_id = 2, first_optional_id = NULL, '
+					.'second_optional_id = 3, properties = "param"=>"value",',
+				$updateUser->toDialectString(ImaginaryDialect::me())
+			);
+		}
+		
+		public function testUpdateQueryByUserWithValueObject()
+		{
+			$moscow = $this->spawnCity();
+			$oldContactExt = $this->spawnContactValueExt(array('email' => 'bar@foo.com'));
+			$oldUser = $this->spawnUserWithContactExt(array('contactExt' => $oldContactExt));
+			$contactExt = $this->spawnContactValueExt(array('city' => $moscow));
+			$user = $this->spawnUserWithContactExt(array('contactExt' => $contactExt));
+			
+			$updateUser = $user->proto()->fillQuery(OSQL::update(), $user, $oldUser);
+			$this->assertEquals(
+				'UPDATE  SET email = foo@bar.com, city_id = 20',
+				$updateUser->toDialectString(ImaginaryDialect::me())
+			);
+		}
+		
+		public function testUpdateQueryByUserWithSameValueObject()
+		{
+			//if value object same for both main objects - we'll update all fields from value object
+			$contactExt = $this->spawnContactValueExt();
+			$oldUser = $this->spawnUserWithContactExt(array('contactExt' => $contactExt));
+			$user = $this->spawnUserWithContactExt(array('contactExt' => $contactExt));
+			
+			$updateUser = $user->proto()->fillQuery(OSQL::update(), $user, $oldUser);
+			$this->assertEquals(
+				'UPDATE  SET email = foo@bar.com, icq = 12345678, '
+					.'phone = 89012345678, city_id = NULL, '
+					.'web = https://www.github.com/, skype = github',
 				$updateUser->toDialectString(ImaginaryDialect::me())
 			);
 		}
@@ -142,7 +190,6 @@
 		private function spawnContactValueExt($options = array())
 		{
 			$options += array(
-				'id' => 2,
 				'web' => 'https://www.github.com/',
 				'skype' => 'github',
 				'email' => 'foo@bar.com',
