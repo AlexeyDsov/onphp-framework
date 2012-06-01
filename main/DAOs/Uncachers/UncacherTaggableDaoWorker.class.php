@@ -19,14 +19,15 @@
 		/**
 		 * @return UncacherTaggableDaoWorker
 		 */
-		public static function create($className, $idKey, $tags, TaggableDaoWorker $worker)
+		public static function create($className, $idKey, array $tags = array())
 		{
-			return new self($className, $idKey, $tags, $worker);
+			return new self($className, $idKey, $tags);
 		}
 		
-		public function __construct($className, $idKey, $tags, TaggableDaoWorker $worker)
+		public function __construct($className, $idKey, array $tags = array())
 		{
-			$this->classNameMap[$className] = array(array($idKey), $tags, $worker);
+			$idKeyList = $idKey ? array($idKey) : array();
+			$this->classNameMap[$className] = array($idKeyList, $tags);
 		}
 		
 		/**
@@ -49,14 +50,18 @@
 		public function uncache()
 		{
 			foreach ($this->classNameMap as $className => $uncaches) {
-				list($idKeys, $tags, $worker) = $uncaches;
-				/* @var $worker TaggableDaoWorker */
+				list($idKeys, $tags) = $uncaches;
+				$dao = ClassUtils::callStaticMethod("$className::dao");
+				/* @var $dao StorableDAO */
+				$worker = Cache::worker($dao);
+				Assert::isInstance($worker, 'TaggableDaoWorker');
+				
 				$worker->expireTags($tags);
 				
 				foreach ($idKeys as $key)
 					Cache::me()->mark($className)->delete($key);
 				
-				ClassUtils::callStaticMethod("$className::dao")->uncacheLists();
+				$dao->uncacheLists();
 			}
 		}
 		
