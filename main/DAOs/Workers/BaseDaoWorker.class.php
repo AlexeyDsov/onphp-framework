@@ -84,7 +84,7 @@
 		//@{
 		public function uncacheById($id)
 		{
-			return $this->getUncacherById($id)->uncache();
+			return $this->registerUncacher($this->getUncacherById($id));
 		}
 		
 		/**
@@ -100,9 +100,17 @@
 		
 		public function uncacheByQuery(SelectQuery $query)
 		{
-			return
-				Cache::me()->mark($this->className)->
-					delete($this->makeQueryKey($query, self::SUFFIX_QUERY));
+			return $this->registerUncacher(
+				UncacherBaseDaoWorker::create(
+					$this->className,
+					$this->makeQueryKey($query, self::SUFFIX_QUERY)
+				)
+			);
+		}
+		
+		protected function registerUncacher(UncacherBase $uncacher)
+		{
+			return $this->dao->registerWorkerUncacher($uncacher);
 		}
 		//@}
 		
@@ -121,6 +129,7 @@
 				Cache::me()->mark($this->className)->
 					get($this->makeQueryKey($query, self::SUFFIX_QUERY));
 		}
+		
 		//@}
 		
 		/// fetchers

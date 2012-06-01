@@ -483,7 +483,8 @@
 		/**
 		 * @return UncacherBase
 		 */
-		public function getUncacherById($id) {
+		public function getUncacherById($id)
+		{
 			return UncacherCommonDaoWorker::create(
 				$this->className,
 				$this->makeIdKey($id)
@@ -500,7 +501,7 @@
 			foreach ($ids as $id)
 				$uncacher->merge($this->getUncacherById($id));
 			
-			return $uncacher->uncache();
+			return $this->registerUncacher($uncacher->uncache());
 		}
 		
 		// quite useless here
