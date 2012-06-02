@@ -255,7 +255,7 @@
 		{
 			$tags = self::$handler->getDefaultTags($this->className);
 			return $this->registerUncacher(
-				UncacherTaggableDaoWorker::create($this->className, null, $tags)
+				UncacherTaggableDaoWorkerTags::create($this->className, $tags)
 			);
 		}
 
