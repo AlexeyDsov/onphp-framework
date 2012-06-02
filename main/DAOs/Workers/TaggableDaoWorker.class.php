@@ -254,7 +254,9 @@
 		public function uncacheLists()
 		{
 			$tags = self::$handler->getDefaultTags($this->className);
-			return $this->registerUncacher($uncacher);
+			return $this->registerUncacher(
+				UncacherTaggableDaoWorker::create($this->className, null, $tags)
+			);
 		}
 
 		//@}
