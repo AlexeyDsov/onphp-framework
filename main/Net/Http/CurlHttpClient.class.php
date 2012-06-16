@@ -23,6 +23,10 @@
 		private $multiRequests = array();
 		private $multiResponses = array();
 		private $multiThreadOptions = array();
+		/**
+		 * @deprecated in the furure will work like this value is false;
+		 */
+		private $oldUrlConstructor = ONPHP_CURL_CLIENT_OLD_TO_STRING;
 		
 		/**
 		 * @return CurlHttpClient
@@ -146,6 +150,26 @@
 		public function getMaxFileSize()
 		{
 			return $this->maxFileSize;
+		}
+		
+		/**
+		 * @deprecated in the future value always false and method will be  removed
+		 * @param bool $oldUrlConstructor
+		 * @return CurlHttpClient 
+		 */
+		public function setOldUrlConstructor($oldUrlConstructor = false)
+		{
+			$this->oldUrlConstructor = ($oldUrlConstructor == true);
+			return $this;
+		}
+		
+		/**
+		 * @deprecated in the future value always false and method will be removed
+		 * @return bool
+		 */
+		public function isOldUrlConstructor()
+		{
+			return $this->oldUrlConstructor;
 		}
 		
 		/**
@@ -280,9 +304,13 @@
 					break;
 					
 				case HttpMethod::POST:
+					if ($request->getGet())
+						$options[CURLOPT_URL] .=
+							($request->getUrl()->getQuery() ? '&' : '?')
+								.$this->argumentsToString($request->getGet());
+					
 					$options[CURLOPT_POST] = true;
-					$options[CURLOPT_POSTFIELDS] =
-					$this->argumentsToString($request->getPost());
+					$options[CURLOPT_POSTFIELDS] = $this->getPostFields($request);
 					break;
 					
 				default:
@@ -337,23 +365,27 @@
 			return $this;
 		}
 		
-		private function argumentsToString($array)
+		private function argumentsToString($array, $isFile = false)
 		{
-			Assert::isArray($array);
-			$result = array();
-			
-			foreach ($array as $key => $value) {
-				if (is_array($value)) {
-					foreach ($value as $valueKey => $simpleValue) {
-						$result[] =
-							$key.'['.$valueKey.']='.urlencode($simpleValue);
-					}
-				} else {
-					$result[] = $key.'='.urlencode($value);
-				}
+			if ($this->oldUrlConstructor)
+				return UrlParamsUtils::toStringOneDeepLvl($array);
+			else
+				return UrlParamsUtils::toString($array);
+		}
+		
+		private function getPostFields(HttpRequest $request)
+		{
+			if ($request->hasBody()) {
+				return $request->getBody();
+			} else {
+				if ($this->oldUrlConstructor)
+					return UrlParamsUtils::toStringOneDeepLvl($request->getPost());
+				else
+					return array_merge(
+						UrlParamsUtils::toParamsList($request->getPost()),
+						UrlParamsUtils::toParamsList($request->getFiles(), true)
+					);
 			}
-			
-			return implode('&', $result);
 		}
 	}
 ?>
