@@ -40,18 +40,21 @@
 		
 		public static function toString($array)
 		{
-			$sum = function ($left, $right) {return $left.'='.$right;};
-			$params = self::toParamsList($array);
+			$sum = function ($left, $right) {return $left.'='.urlencode($right);};
+			$params = self::toParamsList($array, 'urlencode');
 			return implode('&',
 				array_map($sum, array_keys($params), $params)
 			);
 		}
 		
-		public static function toParamsList($array, $isFile = false)
+		public static function toParamsList($array, $keyFilter = null)
 		{
 			$result = array();
 
-			self::argumentsToParams($array, $result, '', $isFile);
+			if ($keyFilter)
+				Assert::isTrue(is_callable($keyFilter));
+			
+			self::argumentsToParams($array, $result, '', $keyFilter);
 
 			return $result;
 		}
@@ -60,22 +63,19 @@
 			$array,
 			&$result,
 			$keyPrefix,
-			$isFile
+			$keyFilter = null
 		) {
 			foreach ($array as $key => $value) {
+				$filteredKey = $keyFilter
+					? call_user_func($keyFilter, $key)
+					: $key;
 				$fullKey = $keyPrefix
-					? ($keyPrefix.'['.urlencode($key).']')
-					: urlencode($key);
+					? ($keyPrefix.'['.$filteredKey.']')
+					: $filteredKey;
 				
 				if (is_array($value)) {
-					self::argumentsToParams($value, $result, $fullKey, $isFile );
+					self::argumentsToParams($value, $result, $fullKey, $keyFilter);
 				} else {
-					if ($isFile) {
-						Assert::isTrue(is_readable($value), 'file '.$value.' is not readable');
-						$value = '@'.$value;
-					} else {
-						$value = urlencode($value);
-					}
 					$result[$fullKey] = $value;
 				}
 			}

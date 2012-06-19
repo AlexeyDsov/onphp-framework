@@ -309,8 +309,10 @@
 							($request->getUrl()->getQuery() ? '&' : '?')
 								.$this->argumentsToString($request->getGet());
 					
-					$options[CURLOPT_POST] = true;
 					$options[CURLOPT_POSTFIELDS] = $this->getPostFields($request);
+					if (!is_array($options[CURLOPT_POSTFIELDS]))
+						$options[CURLOPT_POST] = true;
+					
 					break;
 					
 				default:
@@ -378,14 +380,48 @@
 			if ($request->hasBody()) {
 				return $request->getBody();
 			} else {
-				if ($this->oldUrlConstructor)
+				if ($this->oldUrlConstructor) {
 					return UrlParamsUtils::toStringOneDeepLvl($request->getPost());
-				else
-					return array_merge(
-						UrlParamsUtils::toParamsList($request->getPost()),
-						UrlParamsUtils::toParamsList($request->getFiles(), true)
+				} else {
+					$fileList = array_map(
+						array($this, 'fileFilter'),
+						UrlParamsUtils::toParamsList($request->getFiles())
 					);
+					if (empty($fileList)) {
+						return UrlParamsUtils::toString($request->getPost());
+					} else {
+						$postList = UrlParamsUtils::toParamsList($request->getPost());
+						if ($this->hasDotInPost($postList))
+							throw new NetworkException(
+								'Security excepion: not allowed send post params '
+									. 'which begins from @ in request which contains files'
+							);
+							
+						return array_merge($postList, $fileList);
+					}
+				}
 			}
+		}
+		
+		private function hasDotInPost($postList)
+		{
+			foreach ($postList as $param)
+				if (mb_stripos($param, '@') === 0)
+					return true;
+		}
+		
+		/**
+		 * used in getPostFields - array_map func
+		 * @param string $value
+		 * @return string
+		 */
+		private function fileFilter($value)
+		{
+			Assert::isTrue(
+				is_readable($value) && is_file($value),
+				'couldn\'t access to file with path: '.$value
+			);
+			return '@'.$value;
 		}
 	}
 ?>
