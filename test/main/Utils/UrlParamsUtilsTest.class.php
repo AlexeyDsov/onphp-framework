@@ -39,8 +39,8 @@
 			
 			$this->assertEquals(
 				array(
-					'foo[foo][foo]' => '%40bar',
-					'bar[%40bar][bar]' => 'foo%5B%5D%D1%8F',
+					'foo[foo][foo]' => '@bar',
+					'bar[@bar][bar]' => 'foo[]я',
 					'fo[0][0]' => 'o',
 					'fo[0][1]' => 'ba',
 					'fo[0][2]' => 'r',

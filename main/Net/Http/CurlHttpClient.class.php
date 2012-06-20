@@ -309,9 +309,8 @@
 							($request->getUrl()->getQuery() ? '&' : '?')
 								.$this->argumentsToString($request->getGet());
 					
+					$options[CURLOPT_POST] = true;
 					$options[CURLOPT_POSTFIELDS] = $this->getPostFields($request);
-					if (!is_array($options[CURLOPT_POSTFIELDS]))
-						$options[CURLOPT_POST] = true;
 					
 					break;
 					
@@ -391,10 +390,10 @@
 						return UrlParamsUtils::toString($request->getPost());
 					} else {
 						$postList = UrlParamsUtils::toParamsList($request->getPost());
-						if ($this->hasDotInPost($postList))
+						if ($atParam = $this->findAtParamInPost($postList))
 							throw new NetworkException(
-								'Security excepion: not allowed send post params '
-									. 'which begins from @ in request which contains files'
+								'Security excepion: not allowed send post param '.$atParam
+									. ' which begins from @ in request which contains files'
 							);
 							
 						return array_merge($postList, $fileList);
@@ -403,11 +402,17 @@
 			}
 		}
 		
-		private function hasDotInPost($postList)
+		/**
+		 * Return param name which start with symbol @ or null
+		 * @param array $postList
+		 * @return string|null
+		 */
+		private function findAtParamInPost($postList)
 		{
 			foreach ($postList as $param)
 				if (mb_stripos($param, '@') === 0)
-					return true;
+					return $param;
+			return null;
 		}
 		
 		/**

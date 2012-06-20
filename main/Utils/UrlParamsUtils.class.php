@@ -47,14 +47,11 @@
 			);
 		}
 		
-		public static function toParamsList($array, $keyFilter = null)
+		public static function toParamsList($array, $encodeKey = false)
 		{
 			$result = array();
-
-			if ($keyFilter)
-				Assert::isTrue(is_callable($keyFilter));
 			
-			self::argumentsToParams($array, $result, '', $keyFilter);
+			self::argumentsToParams($array, $result, '', $encodeKey);
 
 			return $result;
 		}
@@ -63,18 +60,16 @@
 			$array,
 			&$result,
 			$keyPrefix,
-			$keyFilter = null
+			$encodeKey = false
 		) {
 			foreach ($array as $key => $value) {
-				$filteredKey = $keyFilter
-					? call_user_func($keyFilter, $key)
-					: $key;
+				$filteredKey = $encodeKey ? urlencode($key) : $key;
 				$fullKey = $keyPrefix
 					? ($keyPrefix.'['.$filteredKey.']')
 					: $filteredKey;
 				
 				if (is_array($value)) {
-					self::argumentsToParams($value, $result, $fullKey, $keyFilter);
+					self::argumentsToParams($value, $result, $fullKey, $encodeKey);
 				} else {
 					$result[$fullKey] = $value;
 				}

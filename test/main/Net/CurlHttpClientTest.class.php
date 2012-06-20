@@ -56,6 +56,7 @@
 						'f' => array('1' => '2'),
 						'g' => array('4' => '3'),
 					),
+					'k' => $this->getFile1Path(),
 				)
 			);
 			$post2 = array('post' => 'value');
@@ -104,7 +105,7 @@
 			);
 		}
 		
-		public function testSecurityExceptionWithDotInPost()
+		public function testSecurityExceptionWithSendingFileAndAtInPost()
 		{
 			$post = array(
 				'a' => array(
@@ -126,9 +127,6 @@
 			}
 		}
 		
-		/**
-		 * @group cuu 
-		 */
 		public function testSendingNotExistsFile()
 		{	
 			$files = array('file' => $this->getFileNotExists());
