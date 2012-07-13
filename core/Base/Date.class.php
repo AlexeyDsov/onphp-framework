@@ -33,8 +33,6 @@
 		 */
 		protected $dateTime = null;
 
-		protected $int		= null;
-
 		/**
 		 * @return Date
 		**/
@@ -139,17 +137,12 @@
 			
 		public function  __sleep()
 		{
-			return array('int');
-		}
-
-		public function  __wakeup()
-		{
-			$this->import($this->int);
+			return array('dateTime');
 		}
 
 		public function toStamp()
 		{
-			return $this->int;
+			return $this->getDateTime()->getTimestamp();
 		}
 		
 		public function toDate($delimiter = '-')
@@ -209,7 +202,6 @@
 		{
 			try {
 				$this->dateTime->modify($string);
-				$this->int = $this->dateTime->getTimestamp();
 			} catch (Exception $e) {
 				throw new WrongArgumentException(
 					"wrong time string '{$string}'"
@@ -339,7 +331,6 @@
 				);
 			}
 
-			$this->int = $this->dateTime->getTimestamp();
 		}
 	}
 ?>

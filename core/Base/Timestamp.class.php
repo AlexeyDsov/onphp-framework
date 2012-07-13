@@ -53,11 +53,10 @@
 		{
 			parent::__construct($dateTime);
 
-			if(!$zone) {
-				$zone = $this->getDefaultTimeZone();
+			if($zone) {
+				$this->dateTime->setTimezone($zone);
 			}
 
-			$this->dateTime->setTimezone($zone);
 		}
 
 		private function getDefaultTimeZone()
