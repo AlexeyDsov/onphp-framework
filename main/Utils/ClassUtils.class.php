@@ -223,11 +223,21 @@
 					if (
 						!class_exists($className)
 						&& !interface_exists($className)
+						&& !(self::isPhp54() && trait_exists($className))
 					) {
 						include $file;
 					}
 				}
 			}
+		}
+		
+		private static function isPhp54()
+		{
+			static $checked = null;
+			if ($checked !== null)
+				return $checked;
+			
+			return $checked = version_compare(PHP_VERSION, '5.4', '>=');
 		}
 	}
 ?>
