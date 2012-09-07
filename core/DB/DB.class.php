@@ -74,7 +74,7 @@
 			}
 		}
 		
-		public static function getDialect()
+		public function getDialect()
 		{
 			throw new UnimplementedFeatureException('implement me, please');
 		}

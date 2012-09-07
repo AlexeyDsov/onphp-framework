@@ -23,6 +23,11 @@
 		const LITERAL_TRUE = 'TRUE';
 		const LITERAL_FALSE = 'FALSE';
 		
+		/**
+		 * @var DB
+		 */
+		protected $db = null;
+		
 		abstract public function preAutoincrement(DBColumn $column);
 		abstract public function postAutoincrement(DBColumn $column);
 		
@@ -30,18 +35,14 @@
 		abstract public function hasMultipleTruncate();
 		abstract public function hasReturning();
 		
-		/**
-			must be implemented too:
-			
-			public static function quoteValue($value);
-		**/
+		abstract public function quoteValue($value);
 		
-		public static function quoteField($field)
+		public function quoteField($field)
 		{
-			return self::quoteTable($field);
+			return $this->quoteTable($field);
 		}
 		
-		public static function quoteTable($table)
+		public function quoteTable($table)
 		{
 			return '"'.$table.'"';
 		}
@@ -65,6 +66,16 @@
 				$cascade
 					? ' CASCADE'
 					: ' RESTRICT';
+		}
+		
+		/**
+		 * @param DB $db
+		 * @return Dialect
+		 */
+		public function setDB(DB $db)
+		{
+			$this->db = $db;
+			return $this;
 		}
 		
 		public function quoteBinary($data)
@@ -158,6 +169,17 @@
 		public function quoteIpInRange($range, $ip)
 		{
 			throw new UnimplementedFeatureException();
+		}
+		
+		protected function getLink()
+		{
+			if (!$this->db)
+				throw new WrongStateException('Expected setted db');
+			if (!$this->db->isConnected()) {
+				$this->db->connect();
+			}
+			
+			return $this->db->getLink();
 		}
 	}
 ?>

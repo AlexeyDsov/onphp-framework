@@ -22,9 +22,9 @@
 		/**
 		 * @return MyDialect
 		**/
-		public static function getDialect()
+		public function getDialect()
 		{
-			return MyDialect::me();
+			return MyDialect::me()->setDB($this);
 		}
 		
 		/**

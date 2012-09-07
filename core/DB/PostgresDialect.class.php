@@ -44,9 +44,9 @@
 			self::$rankFunction = $rank;
 		}
 		
-		public static function quoteValue($value)
+		public function quoteValue($value)
 		{
-			return "'".pg_escape_string($value)."'";
+			return "'".pg_escape_string($this->getLink(), $value)."'";
 		}
 		
 		public static function toCasted($field, $type)
@@ -54,7 +54,7 @@
 			return "{$field}::{$type}";
 		}
 		
-		public static function prepareFullText(array $words, $logic)
+		public function prepareFullText(array $words, $logic)
 		{
 			$glue = ($logic == DB::FULL_TEXT_AND) ? ' & ' : ' | ';
 			
@@ -63,7 +63,7 @@
 					implode(
 						$glue,
 						array_map(
-							array('PostgresDialect', 'quoteValue'),
+							array($this, 'quoteValue'),
 							$words
 						)
 					)
@@ -72,7 +72,7 @@
 		
 		public function quoteBinary($data)
 		{
-			$esc = pg_escape_bytea($data);
+			$esc = pg_escape_bytea($this->getLink(), $data);
 			if (mb_strpos($esc, '\\x') === 0) {
 				// http://www.postgresql.org/docs/9.1/static/datatype-binary.html
 				// if pg_escape_bytea use postgres 9.1+ it's return value like '\x00aabb' (new bytea hex format),
@@ -123,7 +123,7 @@
 		
 		public function fullTextSearch($field, $words, $logic)
 		{
-			$searchString = self::prepareFullText($words, $logic);
+			$searchString = $this->prepareFullText($words, $logic);
 			$field = $this->fieldToString($field);
 			
 			return
@@ -133,7 +133,7 @@
 		
 		public function fullTextRank($field, $words, $logic)
 		{
-			$searchString = self::prepareFullText($words, $logic);
+			$searchString = $this->prepareFullText($words, $logic);
 			$field = $this->fieldToString($field);
 			
 			return

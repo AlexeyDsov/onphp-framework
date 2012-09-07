@@ -35,17 +35,17 @@
 			return 'AUTOINCREMENT';
 		}
 		
-		public static function quoteValue($value)
+		public function quoteValue($value)
 		{
 			return $value;
 		}
 		
-		public static function quoteField($field)
+		public function quoteField($field)
 		{
 			return $field;
 		}
 		
-		public static function quoteTable($table)
+		public function quoteTable($table)
 		{
 			return $table;
 		}

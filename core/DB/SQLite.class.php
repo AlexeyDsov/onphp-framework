@@ -23,9 +23,9 @@
 		/**
 		 * @return LiteDialect
 		**/
-		public static function getDialect()
+		public function getDialect()
 		{
-			return LiteDialect::me();
+			return LiteDialect::me()->setDB($this);
 		}
 		
 		/**

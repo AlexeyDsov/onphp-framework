@@ -21,9 +21,9 @@
 		/**
 		 * @return PostgresDialect
 		**/
-		public static function getDialect()
+		public function getDialect()
 		{
-			return PostgresDialect::me();
+			return PostgresDialect::me()->setDB($this);
 		}
 		
 		/**

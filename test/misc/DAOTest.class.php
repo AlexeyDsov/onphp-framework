@@ -127,6 +127,22 @@
 			$this->drop();
 		}
 		
+		public function testPrepairFullText()
+		{
+			foreach (DBTestPool::me()->getPool() as $connector => $db) {
+				/* @var $db DB */
+				if ($db instanceof PgSQL) {
+					$this->assertEquals(
+						"'новый год' & 'снегурочка' & 'праздник'",
+						$db->getDialect()->prepareFullText(
+							array('Новый год', 'Снегурочка', 'ПрАзДнИк'),
+							DB::FULL_TEXT_AND
+						)
+					);
+				}
+			}
+		}
+		
 		public function testCriteria()
 		{
 			$this->create();

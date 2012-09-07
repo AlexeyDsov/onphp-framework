@@ -27,7 +27,7 @@
 			return Singleton::getInstance(__CLASS__, $link);
 		}
 		
-		public static function quoteValue($value)
+		public function quoteValue($value)
 		{
 			/// @see Sequenceless for this convention
 			
@@ -38,7 +38,7 @@
 				"'"
 				.mysqli_real_escape_string(
 					// can't find better way atm.
-					DBPool::me()->getLink()->getLink(),
+					$this->getLink(),
 					$value
 				)
 				."'";
