@@ -109,7 +109,7 @@
 		private function nonIntegerIdentifier()
 		{
 			$id = 'non-integer-one';
-			$binaryData = "\0!bbq!\0";
+			$binaryData = "\0!b'\nbq!\0";
 			
 			$bin =
 				TestBinaryStuff::create()->
