@@ -20,6 +20,7 @@
 	{
 		private $to				= null;
 		private $cc				= null;
+		private $bcc			= null;
 		private $text			= null;
 		private $subject		= null;
 		private $from			= null;
@@ -105,6 +106,9 @@
 			if ($this->cc != null)
 				$headers .= "Cc: ".$this->cc."\n";
 			
+			if ($this->bcc != null)
+				$headers .= "Bcc: ".$this->bcc."\n";
+			
 			if ($this->contentType === null)
 				$this->contentType = 'text/plain';
 			
@@ -141,6 +145,15 @@
 		public function setCc($cc)
 		{
 			$this->cc = $cc;
+			return $this;
+		}
+		
+		/**
+		 * @return Mail
+		**/
+		public function setBcc($bcc)
+		{
+			$this->bcc = $bcc;
 			return $this;
 		}
 		
