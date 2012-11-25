@@ -41,17 +41,17 @@
 			$stalingrad->dao()->add($stalingrad);
 
 			$prms = array();
-			$prms[] = \Onphp\Primitive::identifier('city')
-				->setScalar(true)
-				->of('\Onphp\Test\TestCity')
-				->setMethodName('\Onphp\Test\PrimitiveIdentifierTest::getCityByName')
-				->setExtractMethod('\Onphp\Test\PrimitiveIdentifierTest::getCityName');
+			$prms[] = \Onphp\Primitive::identifier('city')->
+				setScalar(true)->
+				of('\Onphp\Test\TestCity')->
+				setMethodName('\Onphp\Test\PrimitiveIdentifierTest::getCityByName')->
+				setExtractMethod('\Onphp\Test\PrimitiveIdentifierTest::getCityName');
 			
-			$prms[] = \Onphp\Primitive::identifier('city')
-				->setScalar(true)
-				->of('\Onphp\Test\TestCity')
-				->setMethodName(array(get_class($this), 'getCityByName'))
-				->setExtractMethod(function(TestCity $city) {return $city->getName();});
+			$prms[] = \Onphp\Primitive::identifier('city')->
+				setScalar(true)->
+				of('\Onphp\Test\TestCity')->
+				setMethodName(array(get_class($this), 'getCityByName'))->
+				setExtractMethod(function(TestCity $city) {return $city->getName();});
 			
 			foreach ($prms as $prm) {
 				$prm->import(array('city' => 'Moscow'));
@@ -74,9 +74,9 @@
 		 */
 		public static function getCityByName($name)
 		{
-			return \Onphp\Criteria::create(TestCity::dao())
-				->add(\Onphp\Expression::eq('name', \Onphp\DBValue::create($name)))
-				->get();
+			return \Onphp\Criteria::create(TestCity::dao())->
+				add(\Onphp\Expression::eq('name', \Onphp\DBValue::create($name)))->
+				get();
 		}
 		
 		public static function getCityName(TestCity $city)
