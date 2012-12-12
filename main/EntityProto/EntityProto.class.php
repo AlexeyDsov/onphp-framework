@@ -99,7 +99,9 @@
 		)
 		{
 			$this->checkConstraints($object, $form, $previousObject);
-			$getter = $this->getValidateObjectGetter($object);
+			$getter = $object
+				? $this->getValidateObjectGetter($object)
+				: null;
 			
 			$previousGetter = $previousObject
 				? $this->getValidateObjectGetter($previousObject)
@@ -112,7 +114,7 @@
 					
 					$childForm = $form->getValue($primitive->getName());
 					
-					$child = $getter->get($primitiveName);
+					$child = $getter ? $getter->get($primitiveName) : null;
 					
 					$previousChild = $previousGetter
 						? $previousGetter->get($primitiveName)
