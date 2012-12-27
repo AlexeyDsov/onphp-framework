@@ -11,7 +11,7 @@
 
 	/**
 	 * Rules support for final Form.
-	 * 
+	 *
 	 * @ingroup Form
 	 * @ingroup Module
 	**/
@@ -24,12 +24,12 @@
 		public function addRule($name, LogicalObject $rule)
 		{
 			Assert::isString($name);
-			
+
 			return $this->add(
 				Primitive::rule($name)->setExpression($rule)
 			);
 		}
-		
+
 		/**
 		 * @throws MissingElementException
 		 * @return Form
@@ -42,10 +42,10 @@
 			}
 			return $this->drop($name);
 		}
-		
+
 		public function ruleExists($name)
 		{
-			return $this->primitiveExists($name)
+			return $this->exists($name)
 				&& $this->get($name) instanceof PrimitiveRule;
 		}
 	}

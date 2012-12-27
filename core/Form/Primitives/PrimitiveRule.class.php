@@ -24,6 +24,14 @@
 			$this->expression = clone $this->expression;
 		}
 
+		public function __construct($name, LogicalObject $exp = null)
+		{
+			parent::__construct($name);
+			if ($exp) {
+				$this->setExpression($exp);
+			}
+		}
+
 		/**
 		 * @return PrimitiveRule
 		**/
