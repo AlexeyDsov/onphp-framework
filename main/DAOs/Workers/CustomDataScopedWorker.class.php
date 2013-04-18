@@ -24,7 +24,8 @@
 			$this->dao = $dao;
 			
 			$this->className = $dao->getObjectName();
-			
+
+			$this->getWatermark();
 			if (($cache = Cache::me()) instanceof WatermarkedPeer)
 				$this->watermark =
 					$cache->mark($this->className)->getActualWatermark();

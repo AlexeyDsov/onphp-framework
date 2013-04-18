@@ -19,18 +19,6 @@
 	**/
 	final class SmartDaoWorker extends TransparentDaoWorker
 	{
-		private $indexKey	= null;
-		
-		public function __construct(GenericDAO $dao)
-		{
-			parent::__construct($dao);
-			
-			$this->indexKey =
-				$this->watermark
-				.$this->className
-				.self::SUFFIX_INDEX;
-		}
-		
 		/// cachers
 		//@{
 		protected function cacheByQuery(
@@ -41,7 +29,7 @@
 		{
 			$queryId = $query->getId();
 			
-			$semKey = $this->keyToInt($this->indexKey);
+			$semKey = $this->keyToInt($this->getIndexKey());
 			
 			$key = $this->makeQueryKey($query, self::SUFFIX_QUERY);
 			
@@ -73,7 +61,7 @@
 			
 			$listKey = $this->makeQueryKey($query, self::SUFFIX_LIST);
 			
-			$semKey = $this->keyToInt($this->indexKey);
+			$semKey = $this->keyToInt($this->getIndexKey());
 			
 			$pool = SemaphorePool::me();
 			
@@ -99,9 +87,9 @@
 		//@{
 		public function uncacheLists()
 		{
-			$intKey	= $this->keyToInt($this->indexKey);
+			$intKey	= $this->keyToInt($this->getIndexKey());
 			return $this->registerUncacher(
-				UncacherSmartDaoWorkerLists::create($this->className, $this->indexKey, $intKey)
+				UncacherSmartDaoWorkerLists::create($this->className, $this->getIndexKey(), $intKey)
 			);
 		}
 		//@}
@@ -126,7 +114,7 @@
 			$cache = Cache::me();
 			
 			$mapExists = true;
-			if (!$map = $cache->mark($this->className)->get($this->indexKey)) {
+			if (!$map = $cache->mark($this->className)->get($this->getIndexKey())) {
 				$map = array();
 				$mapExists = false;
 			}
@@ -135,10 +123,10 @@
 
 			if ($mapExists) {
 				$cache->mark($this->className)->
-					replace($this->indexKey, $map, Cache::EXPIRES_FOREVER);
+					replace($this->getIndexKey(), $map, Cache::EXPIRES_FOREVER);
 			} else {
 				$cache->mark($this->className)->
-					set($this->indexKey, $map, Cache::EXPIRES_FOREVER);
+					set($this->getIndexKey(), $map, Cache::EXPIRES_FOREVER);
 			}
 			
 			return true;
@@ -148,12 +136,12 @@
 		{
 			$pool = SemaphorePool::me();
 			
-			$semKey = $this->keyToInt($this->indexKey);
+			$semKey = $this->keyToInt($this->getIndexKey());
 			
 			if (!$pool->get($semKey))
 				return false;
 			
-			if (!$map = Cache::me()->mark($this->className)->get($this->indexKey)) {
+			if (!$map = Cache::me()->mark($this->className)->get($this->getIndexKey())) {
 				$pool->free($semKey);
 				return false;
 			}
@@ -168,5 +156,12 @@
 			return true;
 		}
 		//@}
+
+		private function getIndexKey()
+		{
+			return $this->getWatermark()
+				.$this->className
+				.self::SUFFIX_INDEX;
+		}
 	}
 ?>

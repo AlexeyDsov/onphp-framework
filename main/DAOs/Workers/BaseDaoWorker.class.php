@@ -23,17 +23,11 @@
 		
 		protected $className = null;
 		
-		protected $watermark = null;
-		
 		public function __construct(GenericDAO $dao)
 		{
 			$this->dao = $dao;
 			
 			$this->className = $dao->getObjectName();
-			
-			if (($cache = Cache::me()) instanceof WatermarkedPeer)
-				$this->watermark =
-					$cache->mark($this->className)->getActualWatermark();
 		}
 		
 		/**
@@ -184,7 +178,7 @@
 		
 		protected function makeIdKey($id)
 		{
-			return $this->className.'_'.$id.$this->watermark;
+			return $this->className.'_'.$id.$this->getWatermark();
 		}
 		
 		protected function makeQueryKey(SelectQuery $query, $suffix)
@@ -193,7 +187,16 @@
 				$this->className
 				.$suffix
 				.$query->getId()
-				.$this->watermark;
+				.$this->getWatermark();
+		}
+
+		protected function getWatermark()
+		{
+			$wm = null;
+			if (($cache = Cache::me()) instanceof WatermarkedPeer) {
+				$wm = $cache->mark($this->className)->getActualWatermark();
+			}
+			return $wm;
 		}
 	}
 ?>
