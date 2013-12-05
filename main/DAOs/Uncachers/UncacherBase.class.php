@@ -17,8 +17,8 @@
 	interface UncacherBase
 	{
 		/**
-		 * @param $uncacher BaseUncacher same as self class
-		 * @return BaseUncacher (this)
+		 * @param $uncacher UncacherBase same as self class
+		 * @return UncacherBase (this)
 		 */
 		public function merge(UncacherBase $uncacher);
 		

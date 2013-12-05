@@ -41,7 +41,7 @@
 		}
 		/**
 		 * @param $uncacher UncacherNullDaoWorker same as self class
-		 * @return BaseUncacher (this)
+		 * @return UncacherBase (this)
 		 */
 		public function merge(UncacherBase $uncacher)
 		{
