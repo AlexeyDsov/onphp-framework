@@ -40,11 +40,11 @@
 		}
 		/**
 		 * @param $uncacher UncacherTaggableDaoWorkerTags same as self class
-		 * @return BaseUncacher (this)
+		 * @return UncacherBase (this)
 		 */
 		public function merge(UncacherBase $uncacher)
 		{
-			Assert::isInstance($uncacher, 'UncacherTaggableDaoWorkerTags');
+			Assert::isInstance($uncacher, '\Onphp\UncacherTaggableDaoWorkerTags');
 			return $this->mergeSelf($uncacher);
 		}
 		
@@ -54,7 +54,8 @@
 				$dao = ClassUtils::callStaticMethod("$className::dao");
 				/* @var $dao StorableDAO */
 				$worker = Cache::worker($dao);
-				Assert::isInstance($worker, 'TaggableDaoWorker');
+				Assert::isInstance($worker, '\Onphp\TaggableDaoWorker');
+				/* @var $worker TaggableDaoWorker */
 				
 				$worker->expireTags($tags);
 			}
