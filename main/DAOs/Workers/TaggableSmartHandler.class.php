@@ -75,11 +75,19 @@
 						if ($tag = $this->getTagByBinaryExpression($whereObject, $query, $className, $columns)) {
 							$tagList[] = $tag;
 						}
+					} elseif ($whereObject instanceof InExpression) {
+						foreach ($this->getTagsByInExpression($whereObject, $query, $className, $columns) as $tag) {
+							$tagList[] = $tag;
+						}
 					}
 					if ($whereObject instanceof LogicalChain) {
 						foreach ($whereObject->getChain() as $logic) {
 							if ($logic instanceof BinaryExpression) {
 								if ($tag = $this->getTagByBinaryExpression($logic, $query, $className, $columns)) {
+									$tagList[] = $tag;
+								}
+							} elseif ($logic instanceof InExpression) {
+								foreach ($this->getTagsByInExpression($logic, $query, $className, $columns) as $tag) {
 									$tagList[] = $tag;
 								}
 							}
@@ -113,6 +121,24 @@
 			return $this->getTableByClassName($className).self::ID_POSTFIX.$id;
 		}
 
+		protected final function getTagsByInExpression(InExpression $expression, SelectQuery $query, &$className, &$columns)
+		{
+			$tags = [];
+			if ($expression->getLogic() == InExpression::IN) {
+				$first = $expression->getLeft();
+				$second = $expression->getRight();
+
+				$columnClassName = $this->getColumnClassName($first, $query, $className, $columns);
+				$idValues = $this->getIdValues($second);
+				if ($columnClassName) {
+					foreach ($idValues as $idValue) {
+						$tags[] = $this->getTagByClassAndId($columnClassName, $idValue);
+					}
+				}
+			}
+			return $tags;
+		}
+
 		protected final function getTagByBinaryExpression(BinaryExpression $expression, SelectQuery $query, &$className, &$columns)
 		{
 			$tag = null;
@@ -125,39 +151,8 @@
 					$second = $expression->getLeft();
 				}
 				
-				$columnClassName = null;
-				$idValue = null;
-				if (
-					$first instanceof DBField
-					&& isset($columns[$first->getField()])
-				) {
-					if ($first->getTable() === null) {
-						$table = $query->getFirstTable();
-					} elseif ($first->getTable() instanceof FromTable) {
-						$table = $first->getTable();
-					}
-					if ($table instanceof FromTable) {
-						$table = $table->getTable();
-					}
-
-					if ($table !== null && $table == $this->getTableByClassName($className)) {
-						$columnClassName = $columns[$first->getField()];
-					}
-				} elseif (is_string($first) && $first && isset($columns[$first])) {
-					$table = $query->getFirstTable();
-					if ($table instanceof FromTable) {
-						$table = $table->getTable();
-					}
-					if ($table !== null && $table == $this->getTableByClassName($className)) {
-						$columnClassName = $columns[$first];
-					}
-				}
-
-				if ($second instanceof DBValue) {
-					$idValue = $second->getValue();
-				} elseif ((is_integer($second) || is_string($second)) && $second) {
-					$idValue = $second;
-				}
+				$columnClassName = $this->getColumnClassName($first, $query, $className, $columns);
+				$idValue = $this->getIdValue($second);
 
 				if ($columnClassName && $idValue) {
 					$tag = $this->getTagByClassAndId($columnClassName, $idValue);
@@ -165,6 +160,57 @@
 			}
 
 			return $tag;
+		}
+
+		protected function getColumnClassName($first, SelectQuery $query, &$className, &$columns)
+		{
+			if (
+				$first instanceof DBField
+				&& isset($columns[$first->getField()])
+			) {
+				if ($first->getTable() === null) {
+					$table = $query->getFirstTable();
+				} elseif ($first->getTable() instanceof FromTable) {
+					$table = $first->getTable();
+				}
+				if ($table instanceof FromTable) {
+					$table = $table->getTable();
+				}
+
+				if ($table !== null && $table == $this->getTableByClassName($className)) {
+					return $columns[$first->getField()];
+				}
+			} elseif (is_string($first) && $first && isset($columns[$first])) {
+				$table = $query->getFirstTable();
+				if ($table instanceof FromTable) {
+					$table = $table->getTable();
+				}
+				if ($table !== null && $table == $this->getTableByClassName($className)) {
+					return $columns[$first];
+				}
+			}
+		}
+
+		protected function getIdValue($second)
+		{
+			if ($second instanceof DBValue) {
+				return $second->getValue();
+			} elseif ((is_integer($second) || is_string($second)) && $second) {
+				return $second;
+			}
+		}
+
+		protected function getIdValues(array $second)
+		{
+			$results = [];
+			foreach ($second as $value) {
+				if ($result = $this->getIdValue($value)) {
+					$results[] = $result;
+				} else {
+					return [];
+				}
+			}
+			return $results;
 		}
 
 		protected function getLinkObjectColumnListByClass($className)
@@ -184,7 +230,7 @@
 		}
 		
 		protected function getTableByClassName($className) {
-			if (ClassUtils::isInstanceOf($className, 'DAOConnected')) {
+			if (ClassUtils::isInstanceOf($className, '\Onphp\DAOConnected')) {
 				return ClassUtils::callStaticMethod("{$className}::dao")->getTable();
 			} else {
 				return $className.'|className|';

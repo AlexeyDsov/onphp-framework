@@ -24,6 +24,9 @@
 		const LOCK_TIMEOUT	= 1600;		// msec
 		const LOCK_PREFIX	= 'lock_';
 
+		/**
+		 * @var TaggableHandler
+		 */
 		private static $handler = null;
 
 		private static $customTags = null;
