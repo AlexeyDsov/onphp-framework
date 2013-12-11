@@ -45,5 +45,16 @@
 		{
 			return $this->pool;
 		}
+		
+		/**
+		 * @param string $connector
+		 * @return \Onphp\DB
+		 */
+		public function getDb($connector)
+		{
+			\Onphp\Assert::isIndexExists($this->pool, $connector);
+			
+			return $this->pool[$connector];
+		}
 	}
 ?>

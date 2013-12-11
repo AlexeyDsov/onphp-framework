@@ -26,18 +26,22 @@
 	$testPathes = array(
 		ONPHP_TEST_PATH.'core'.DIRECTORY_SEPARATOR,
 		ONPHP_TEST_PATH.'main'.DIRECTORY_SEPARATOR,
-		ONPHP_TEST_PATH.'main'.DIRECTORY_SEPARATOR.'\Onphp\Autoloader'.DIRECTORY_SEPARATOR,
+		ONPHP_TEST_PATH.'main'.DIRECTORY_SEPARATOR.'\Autoloader'.DIRECTORY_SEPARATOR,
 		ONPHP_TEST_PATH.'main'.DIRECTORY_SEPARATOR.'Ip'.DIRECTORY_SEPARATOR,
 		ONPHP_TEST_PATH.'main'.DIRECTORY_SEPARATOR.'Net'.DIRECTORY_SEPARATOR,
 		ONPHP_TEST_PATH.'main'.DIRECTORY_SEPARATOR.'Utils'.DIRECTORY_SEPARATOR,
 		ONPHP_TEST_PATH.'main'.DIRECTORY_SEPARATOR.'Utils'.DIRECTORY_SEPARATOR.'Routers'.DIRECTORY_SEPARATOR,
-		ONPHP_TEST_PATH.'main'.DIRECTORY_SEPARATOR.'Utils'.DIRECTORY_SEPARATOR.'\Onphp\AMQP'.DIRECTORY_SEPARATOR,
+		ONPHP_TEST_PATH.'main'.DIRECTORY_SEPARATOR.'Utils'.DIRECTORY_SEPARATOR.'\AMQP'.DIRECTORY_SEPARATOR,
 		ONPHP_TEST_PATH.'db'.DIRECTORY_SEPARATOR,
 	);
 	
-	$config = dirname(__FILE__).'/config.inc.php';
+	$config = __DIR__.'/config.inc.php';
 	
-	include is_readable($config) ? $config : $config.'.tpl';
+	require is_readable($config) ? $config : $config.'.tpl';
+	
+	AllTests::$dbs = $dbs;
+	AllTests::$paths = $testPathes;
+	AllTests::$workers = $daoWorkers;
 	
 	final class AllTests
 	{
@@ -53,7 +57,6 @@
 		public static function suite()
 		{
 			$suite = new TestSuite('onPHP-'.ONPHP_VERSION);
-			
 			// meta, DB and DAOs ordered tests portion
 			if (self::$dbs) {
 				try {
@@ -62,6 +65,7 @@
 					 */
 					\Onphp\Singleton::getInstance('\Onphp\Test\DBTestPool', self::$dbs)->connect();
 				} catch (\Exception $e) {
+					//FIXME: If you have just one bad-configured pool, you will loose all.
 					\Onphp\Singleton::dropInstance('\Onphp\Test\DBTestPool');
 					\Onphp\Singleton::getInstance('\Onphp\Test\DBTestPool');
 				}
@@ -129,8 +133,4 @@
 			return $suite;
 		}
 	}
-	
-	AllTests::$dbs = $dbs;
-	AllTests::$paths = $testPathes;
-	AllTests::$workers = $daoWorkers;
 ?>

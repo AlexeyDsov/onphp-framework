@@ -17,7 +17,8 @@
 	**/
 	namespace Onphp;
 
-	abstract class /* ANSI's */ Dialect {
+	abstract class /* ANSI's */ Dialect
+	{
 		const LITERAL_NULL = 'NULL';
 		const LITERAL_TRUE = 'TRUE';
 		const LITERAL_FALSE = 'FALSE';
@@ -109,33 +110,12 @@
 		
 		public function toFieldString($expression)
 		{
-			return $this->toNeededString($expression, 'quoteField');
+			return $this->toSuitableString($expression, 'quoteField');
 		}
 		
 		public function toValueString($expression)
 		{
-			return $this->toNeededString($expression, 'quoteValue');
-		}
-		
-		private function toNeededString($expression, $method)
-		{
-			if (null === $expression)
-				throw new WrongArgumentException(
-					'not null expression expected'
-				);
-			
-			$string = null;
-			
-			if ($expression instanceof DialectString) {
-				if ($expression instanceof Query)
-					$string .= '('.$expression->toDialectString($this).')';
-				else
-					$string .= $expression->toDialectString($this);
-			} else {
-				$string .= $this->$method($expression);
-			}
-			
-			return $string;
+			return $this->quoteExpression($expression);
 		}
 		
 		public function fieldToString($field)
@@ -188,6 +168,65 @@
 			}
 			
 			return $this->db->getLink();
+		}
+		
+		public function forUpdate($noWait = false)
+		{
+			throw new UnimplementedFeatureException();
+		}
+		
+		public function quotePointInPolygon($polygon, $point)
+		{
+			throw new UnimplementedFeatureException();
+		}
+		
+		public function quoteDistanceBetweenPoints($left, $right)
+		{
+			throw new UnimplementedFeatureException();
+		}
+		
+		public function quoteEqPolygons($left, $right)
+		{
+			throw new UnimplementedFeatureException();
+		}
+		
+		public function quoteEqPoints($left, $right)
+		{
+			throw new UnimplementedFeatureException();
+		}
+		
+		protected function quoteExpression($expression)
+		{
+			return $this->toSuitableString($expression, 'quoteValue');
+		}
+		
+		protected function getCastedExpr($expression, $type)
+		{
+			return 
+				$this->toCasted(
+					$this->quoteExpression($expression), $type
+				);
+		}		
+		
+		private function toSuitableString($expression, $method)
+		{
+			if (null === $expression)
+				throw new WrongArgumentException(
+					'not null expression expected'
+				);
+			
+			$string = null;
+			
+			if ($expression instanceof DialectString) {
+				if ($expression instanceof Query)
+					$string .= '('.$expression->toDialectString($this).')';
+				else
+					$string .= $expression->toDialectString($this);
+			} else {
+				$string .= $this->$method($expression);
+			}
+			
+			return $string;
 		}
 	}
 ?>

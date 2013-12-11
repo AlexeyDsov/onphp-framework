@@ -11,11 +11,20 @@
 			if (!defined('ONPHP_CURL_TEST_URL'))
 				self::$failTestMsg = 'not defined test constant ONPHP_CURL_TEST_URL';
 			
-			self::$emptyMsg = file_get_contents(ONPHP_CURL_TEST_URL);
+			try {
+				self::$emptyMsg = file_get_contents(ONPHP_CURL_TEST_URL);
+			} catch (\Exception $e) {
+				if (!defined('I_DONT_WANT_TO_TEST_CURL'))
+					throw $e;
+			}
 		}
 		
 		public function setUp() {
+			if (defined('I_DONT_WANT_TO_TEST_CURL'))
+				$this->markTestSkipped('You said that you don\'t want to test curl');
+			
 			parent::setUp();
+			
 			if (self::$failTestMsg)
 				$this->fail (self::$failTestMsg);
 			

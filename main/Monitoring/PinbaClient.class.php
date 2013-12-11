@@ -21,6 +21,10 @@
 		private $timers = array();
 		private $queue = array();
 		private $treeLogEnabled = false;
+		private $hostName = "localhost";
+		private $firstUniq = null;
+		private $idShift = 1;
+		private $suffix = null;
 		
 		
 		/**
@@ -58,12 +62,18 @@
 		
 		public function timerStart($name, array $tags, array $data = array())
 		{
+			$name .= $this->suffix;
+
 			if (array_key_exists($name, $this->timers))
-				throw new WrongArgumentException('a timer with the same name allready exists');
+				throw new WrongArgumentException('the timer with name '.$name.' allready exists');
 			
 			if ($this->isTreeLogEnabled()) {
+				if (empty($this->firstUniq)) {
+					$this->firstUniq = uniqid($this->hostName);
+				}
 				
-				$id = uniqid();
+				//must be uniq for 20 minutes
+				$id = $this->firstUniq.':'.($this->idShift++);
 				$tags['treeId'] = $id;
 				
 				if (!empty($this->queue))
@@ -84,27 +94,31 @@
 		
 		public function timerStop($name)
 		{
-			 if ($this->isTreeLogEnabled())
+			if ($this->isTreeLogEnabled())
 				array_pop($this->queue);
 			 
-			 if (!array_key_exists($name, $this->timers))
+			$name .= $this->suffix;
+
+			if (!array_key_exists($name, $this->timers))
 				throw new WrongArgumentException('have no any timer with name '.$name);
 			 
-			  pinba_timer_stop($this->timers[$name]);
+			pinba_timer_stop($this->timers[$name]);
 			  
-			  unset($this->timers[$name]);
+			unset($this->timers[$name]);
 			  
-			  return $this;
+			return $this;
 		}
 		
 		public function isTimerExists($name)
 		{
-			return array_key_exists($name, $this->timers);
+			return array_key_exists($name.$this->suffix, $this->timers);
 		}
 		
 		public function timerDelete($name)
 		{
-			 if (!array_key_exists($name, $this->timers))
+			$name .= $this->suffix;
+
+			if (!array_key_exists($name, $this->timers))
 				throw new WrongArgumentException('have no any timer with name '.$name);
 			
 			pinba_timer_delete($this->timers[$name]);
@@ -116,6 +130,8 @@
 		
 		public function timerGetInfo($name)
 		{
+			$name .= $this->suffix;
+
 			if (!array_key_exists($name, $this->timers))
 				throw new WrongArgumentException('have no any timer with name '.$name);
 			
@@ -131,11 +147,31 @@
 		
 		public function setHostName($name)
 		{
+			$this->hostName = $name;
 			pinba_hostname_set($name);
 			
 			return $this;
 		}
-		
+
+		public function setSuffix($suffix)
+		{
+			$this->suffix = $suffix;
+
+			return $this;
+		}
+
+		public function getSuffix()
+		{
+			return $this->suffix;
+		}
+
+		public function dropSuffix()
+		{
+			$this->suffix = null;
+
+			return $this;
+		}
+
 		/**
 		 * NOTE: You don't need to flush data manually. Pinba do it for you.
 		 */

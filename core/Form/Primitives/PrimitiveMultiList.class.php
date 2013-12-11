@@ -47,9 +47,15 @@
 			Assert::isArray($default);
 			
 			foreach ($default as $index)
-				Assert::isTrue(array_key_exists($index, $this->list));
-			
-			return parent::setDefault($default);
+				Assert::isTrue(
+					array_key_exists($index, $this->list),
+
+					'cannot find elements with such indexes'
+				);
+
+			$this->default = $default;
+
+			return $this;
 		}
 		
 		public function import($scope)

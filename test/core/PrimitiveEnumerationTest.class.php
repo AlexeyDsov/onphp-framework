@@ -32,5 +32,31 @@
 			$primitive->import(array('enum' => \Onphp\DataType::getAnyId()));
 			$this->assertEquals($primitive->getList(), $enum->getObjectList());
 		}
+		
+		public function testNonExsitingValue()
+		{
+			$form = $this->getForm();
+						
+			$form->get('enum')->
+				setDefault(\Onphp\DataType::create(\Onphp\DataType::getAnyId()));
+			
+			$form->import(array('enum' => -10000));
+			
+			$this->assertFalse($form->get('enum')->isImported());
+			$this->assertNull($form->getValue('enum'));
+			$this->assertEquals(
+				\Onphp\DataType::getAnyId(), 
+				$form->getActualValue('enum')->getId()
+			);
+		}
+		
+		private function getForm()
+		{
+			return
+				\Onphp\Form::create()->
+					add(
+						\Onphp\Primitive::enumeration('enum')->of('\Onphp\DataType')
+					);
+		}
 	}
 ?>

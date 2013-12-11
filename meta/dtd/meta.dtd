@@ -9,12 +9,13 @@
 
 <!ELEMENT class (implement*, properties*, pattern)>
 <!ATTLIST class
-		name		ID #REQUIRED
+		name		CDATA #REQUIRED
 		type		(final|abstract) #IMPLIED
 		extends		CDATA #IMPLIED
 		source		CDATA #IMPLIED
 		table		CDATA #IMPLIED
 		namespace	CDATA #IMPLIED
+		fromSlave   (true|false) "false"
 >
 
 <!ELEMENT implement EMPTY>

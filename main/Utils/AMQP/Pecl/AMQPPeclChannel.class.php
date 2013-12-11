@@ -453,7 +453,7 @@
 				"Could not declare queue"
 			);
 
-			return $result;
+			return $this;
 		}
 
 		/**
@@ -548,7 +548,7 @@
 			$this->checkConnection();
 
 			if (!isset($this->exchangeList[$name])) {
-				$this->exchangeList[$name] =
+				$this->exchangeList[$name] =HEAD
 					new \AMQPExchange($this->getChannelLink());
 				$this->exchangeList[$name]->setName($name);
 			}
@@ -577,6 +577,7 @@
 
 			if (!isset($this->queueList[$name])) {
 				$this->queueList[$name] = new \AMQPQueue($this->getChannelLink());
+				
 				if ($name != self::NIL)
 						$this->queueList[$name]->setName($name);
 			}

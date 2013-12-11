@@ -35,6 +35,14 @@
 		{
 			return new InsertQuery();
 		}
+
+		/**
+		 * @return BulkInsertQuery
+		 **/
+		public static function bulkInsert()
+		{
+			return new BulkInsertQuery();
+		}
 		
 		/**
 		 * @return \Onphp\UpdateQuery

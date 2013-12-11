@@ -268,12 +268,17 @@
 					$columnName = $this->type->getClass()->getTableName().'_id';
 				else
 					$columnName = $this->getColumnName();
+			/**
+			 * FIXME: I want to patch this code!
+			 * @see https://github.com/onPHP/onphp-framework/issues/185
+			 */
 			} elseif ($this->type instanceof InternalType) {
 				$out = array();
 				foreach ($this->type->getSuffixList() as $suffix) {
 					$out[] = $this->getColumnName().'_'.$suffix;
 				}
 				return $out;
+			 
 			} else
 				$columnName = $this->getColumnName();
 			

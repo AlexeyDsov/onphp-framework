@@ -63,6 +63,8 @@
 		abstract public function queryColumn(Query $query);
 		abstract public function queryCount(Query $query);
 		
+		abstract public function obtainSequence($sequence);
+		
 		// actually set's encoding
 		abstract public function setDbEncoding();
 		

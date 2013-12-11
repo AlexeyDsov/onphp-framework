@@ -19,10 +19,12 @@
 				setUrl(
 					\Onphp\HttpUrl::create()->parse('https://github.com/')
 				)->
+				setHeaderVar('User-Agent', 'onphp-test')->
 				setMethod(\Onphp\HttpMethod::get());
 			
 			try {
-				$response = \Onphp\CurlHttpClient::create()->
+				$response = 
+					\Onphp\CurlHttpClient::create()->
 					setTimeout(3)->
 					send($request);
 			} catch (\Onphp\NetworkException $e) {

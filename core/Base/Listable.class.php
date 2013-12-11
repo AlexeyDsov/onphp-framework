@@ -48,8 +48,8 @@
 		
 		/**
 		 * Returns the last element of list and removing it
-		 *
-		 * @return mixed
+		 * 
+		 * @return mixed 
 		 */
 		public function pop();
 		
@@ -60,8 +60,8 @@
 		
 		/**
 		 * Returns sublist from $start to $start+$length
-		 *
-		 * @return array
+		 * 
+		 * @return array 
 		 */
 		public function range($start, $length);
 	}

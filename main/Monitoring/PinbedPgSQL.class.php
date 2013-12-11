@@ -16,11 +16,15 @@
 
 	final class PinbedPgSQL extends PgSQL
 	{
+		protected static $n = 0;
+
 		public function connect()
 		{
+			self::$n++;
+
 			if (PinbaClient::isEnabled())
 				PinbaClient::me()->timerStart(
-					'pg_sql_connect_'.$this->basename,
+					$this->getConnectTimerName(),
 					array(
 					'group' => 'sql',
 					'pg_sql_connect' => $this->basename
@@ -30,9 +34,14 @@
 			$result = parent::connect();
 			
 			if (PinbaClient::isEnabled())
-				PinbaClient::me()->timerStop('pg_sql_connect_'.$this->basename);
+				PinbaClient::me()->timerStop($this->getConnectTimerName());
 			
 			return $result;
+		}
+
+		protected function getConnectTimerName()
+		{
+			return 'pg_sql_connect_'.$this->basename.'_'.self::$n;
 		}
 		
 		public function queryRaw($queryString)

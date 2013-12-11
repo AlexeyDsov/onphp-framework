@@ -17,7 +17,7 @@
 				);
 			
 			$this->assertEquals(
-				"'127.0.0.3' <<= '127.0.0.1-127.0.0.5'",
+				"'127.0.0.3' <<= '127.0.0.1-127.0.0.5'::ip4r",
 				$expression->toDialectString($dialect)
 			);
 			
@@ -46,7 +46,7 @@
 			
 			$this->assertEquals(
 				$criteria->toDialectString($dialect),
-				'SELECT "test_user"."id" FROM "test_user" WHERE "test_user"."ip" <<= \'192.168.1.1-192.168.1.255\''
+				'SELECT "test_user"."id" FROM "test_user" WHERE "test_user"."ip" <<= \'192.168.1.1-192.168.1.255\'::ip4r'
 			);
 			
 			$criteria =

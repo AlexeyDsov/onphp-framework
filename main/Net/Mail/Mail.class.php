@@ -17,7 +17,7 @@
 	 * See 'man sendmail' for details.
 	**/
 	namespace Onphp;
-
+	
 	class Mail
 	{
 		private $to				= null;

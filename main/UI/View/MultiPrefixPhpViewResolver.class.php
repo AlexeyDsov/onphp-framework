@@ -58,7 +58,7 @@
 			
 			Assert::isFalse(
 				isset($this->prefixes[$alias]),
-				'alias already exists'
+				'alias already exists for: '.$prefix
 			);
 				
 			$this->prefixes[$alias] = $prefix;

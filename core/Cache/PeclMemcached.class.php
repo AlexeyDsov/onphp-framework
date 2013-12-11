@@ -25,6 +25,8 @@
 		const DEFAULT_HOST		= '127.0.0.1';
 		const DEFAULT_TIMEOUT	= 1;
 		
+		const CAS_EMPTY			= 'I_AM_EMPTY';
+		
 		protected $host			= null;
 		protected $port			= null;
 		private $instance		= null;
@@ -123,20 +125,31 @@
 		
 		public function get($index)
 		{
+			return $this->doGet($index);
+		}
+		
+		public function getc($index, &$cas)
+		{
+			return $this->doGet($index, $cas);
+		}
+		
+		public function cas($key, $value, $expires = Cache::EXPIRES_MEDIUM, $cas)
+		{
 			$this->ensureTriedToConnect();
 			
 			try {
-				return $this->instance->get($index);
-			} catch (BaseException $e) {
-				if(strpos($e->getMessage(), 'Invalid key') !== false)
-					return null;
+				return
+					$this->instance->cas(
+						$key, 
+						$value,
+						null,
+						$expires,
+						$cas
+					);
 				
-				$this->alive = false;
-				
-				return null;
-			}
-			
-			Assert::isUnreachable();
+			} catch (\Onphp\BaseException $e) {
+				return $this->alive = false;
+			}	
 		}
 		
 		public function delete($index)
@@ -148,7 +161,7 @@
 				// delete key 0 (see process_delete_command in the memcached.c)
 				// Warning: it is workaround!
 				return $this->instance->delete($index, 0);
-			} catch (BaseException $e) {
+			} catch (\Onphp\BaseException $e) {
 				return $this->alive = false;
 			}
 			
@@ -239,8 +252,38 @@
 				$this->alive = true;
 				
 			} catch (BaseException $e) {
-				// bad luck.
+				// bad luck
 			}
+		}
+		
+		private function doGet($index, &$cas = self::CAS_EMPTY)
+		{
+			$this->ensureTriedToConnect();
+			
+			try {
+				$cazz = null;
+				
+				$result =
+					(
+						($cas === self::CAS_EMPTY)
+							? $this->instance->get($index)
+							: $this->instance->get($index, null, $cazz)
+					);
+				
+				$cas = $cazz;
+				
+				return $result;
+				
+			} catch (\Onphp\BaseException $e) {
+				if(strpos($e->getMessage(), 'Invalid key') !== false)
+					return null;
+				
+				$this->alive = false;
+				
+				return null;
+			}
+			
+			Assert::isUnreachable();
 		}
 	}
 ?>

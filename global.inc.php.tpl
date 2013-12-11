@@ -17,7 +17,16 @@
 	{
 		throw new BaseException($string, $code);
 	}
+	
+	/* void */ function __autoload_failed($classname, $message)
+	{
+		if (!class_exists('ClassNotFoundException', false)) {
+			final class ClassNotFoundException extends BaseException {/*_*/}
+		}
 
+		throw new ClassNotFoundException(sprintf('"%s": "%s"', $classname, $message));
+	}
+	
 	// file extensions
 	define('EXT_CLASS', '.class.php');
 	define('EXT_TPL', '.tpl.html');
@@ -168,6 +177,8 @@
 		ONPHP_MAIN_PATH.'Messages'.DIRECTORY_SEPARATOR.'Interface',
 
 		ONPHP_MAIN_PATH.'Application'	,
+		
+		ONPHP_MAIN_PATH.'Geometry'	,
 
 		ONPHP_MAIN_PATH.'Charts',
 		ONPHP_MAIN_PATH.'Charts'.DIRECTORY_SEPARATOR.'Google',

@@ -64,6 +64,24 @@
 			return $result;
 		}
 		
+		public function getc($index, &$cas)
+		{
+			$this->log(__METHOD__);
+			$result = parent::getc($index, $cas);
+			$this->stopLog(__METHOD__);
+			
+			return $result;
+		}
+		
+		public function cas($key, $value, $expires = Cache::EXPIRES_MEDIUM, $cas)
+		{
+			$this->log(__METHOD__);
+			parent::cas($key, $value, $expires, $cas);
+			$this->stopLog(__METHOD__);
+			
+			return $result;
+		}
+		
 		public function getList($indexes)
 		{
 			$this->log(__METHOD__);

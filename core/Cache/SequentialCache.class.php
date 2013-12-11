@@ -11,7 +11,7 @@
 
 	namespace Onphp;
 
-	final class SequentialCache extends CachePeer
+	class SequentialCache extends CachePeer
 	{
 		/**
 		 * List of all peers, including master
@@ -113,6 +113,11 @@
 		public function increment($key, $value)
 		{
 			throw new UnsupportedMethodException('increment is not supported');
+		}
+		
+		protected function checkGetResult($result)
+		{
+			return !empty($result);
 		}
 		
 		protected function store($action, $key, $value, $expires = Cache::EXPIRES_MEDIUM)

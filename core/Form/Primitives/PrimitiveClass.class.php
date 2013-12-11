@@ -14,9 +14,9 @@
 	**/
 	namespace Onphp;
 
-	final class PrimitiveClass extends PrimitiveString
+	class PrimitiveClass extends PrimitiveString
 	{
-		private $ofClassName = null;
+		protected $ofClassName = null;
 		
 		public function import($scope)
 		{
@@ -61,7 +61,7 @@
 			return $this;
 		}
 		
-		private function classExists($name)
+		protected function classExists($name)
 		{
 			try {
 				return class_exists($name, true);
@@ -70,7 +70,7 @@
 			}
 		}
 		
-		private function guessClassName($class)
+		protected function guessClassName($class)
 		{
 			if (is_string($class))
 				return $class;

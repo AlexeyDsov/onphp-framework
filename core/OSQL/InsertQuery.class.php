@@ -14,7 +14,7 @@
 	**/
 	namespace Onphp;
 
-	final class InsertQuery extends InsertOrUpdateQuery
+	class InsertQuery extends InsertOrUpdateQuery
 	{
 		/**
 		 * @var \Onphp\SelectQuery
@@ -80,25 +80,29 @@
 		{
 			throw new UnsupportedMethodException();
 		}
+
+		protected function toDialectStringValue($value, Dialect $dialect)
+		{
+			if ($value === null)
+				return $dialect->literalToString(Dialect::LITERAL_NULL);
+			elseif (true === $value)
+				return $dialect->literalToString(Dialect::LITERAL_TRUE);
+			elseif (false === $value)
+				return  $dialect->literalToString(Dialect::LITERAL_FALSE);
+			elseif ($value instanceof DialectString)
+				return $value->toDialectString($dialect);
+			else
+				return $dialect->quoteValue($value);
+		}
 		
 		protected function toDialectStringValues($query, Dialect $dialect)
 		{
 			$fields = array();
 			$values = array();
-			
+
 			foreach ($this->fields as $var => $val) {
 				$fields[] = $dialect->quoteField($var);
-				
-				if ($val === null)
-					$values[] = $dialect->literalToString(Dialect::LITERAL_NULL);
-				elseif (true === $val)
-					$values[] = $dialect->literalToString(Dialect::LITERAL_TRUE);
-				elseif (false === $val)
-					$values[] = $dialect->literalToString(Dialect::LITERAL_FALSE);
-				elseif ($val instanceof DialectString)
-					$values[] = $val->toDialectString($dialect);
-				else
-					$values[] = $dialect->quoteValue($val);
+				$values[] = $this->toDialectStringValue($val, $dialect);
 			}
 			
 			if (!$fields || !$values)

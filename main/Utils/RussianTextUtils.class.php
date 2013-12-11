@@ -205,6 +205,11 @@
 				return 'сегодня';
 			elseif ($date->toDate() == $tomorrow->toDate() && $wordDayNeed == true)
 				return 'завтра';
+			elseif (
+				$date->toDate() == $today->spawn('-1 day')->toDate()
+				&& $wordDayNeed == true
+			)
+				return 'вчера';
 			else
 				return
 					(int) $date->getDay()

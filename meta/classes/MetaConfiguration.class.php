@@ -714,6 +714,18 @@
 			return $this->out;
 		}
 		
+		public function makePUML()
+		{
+			$out = "@startuml\n";
+			
+			foreach ($this->classes as $metaclass)
+				$out .= MetaClassPUMLGenerator::generate($metaclass);
+			
+			$out .= MetaClassPUMLGenerator::generateLinks($this->classes);
+			
+			return $out."@enduml\n";
+		}
+		
 		/**
 		 * @return \Onphp\MetaConfiguration
 		**/
@@ -1044,6 +1056,13 @@
 				// lazy existence checking
 				if (isset($xmlClass['extends']))
 					$this->liaisons[$class->getName()] = (string) $xmlClass['extends'];
+				
+				// use slave db
+				if (
+					isset($xmlClass['fromSlave'])
+					&& $xmlClass['fromSlave'] == true
+				)
+					$class->setFromSlave(true);
 				
 				// populate implemented interfaces
 				foreach ($xmlClass->implement as $xmlImplement)

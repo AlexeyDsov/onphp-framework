@@ -52,6 +52,9 @@
 	}
 
 	class AMQPTestCaseAutoAckQueueConsumer extends \Onphp\AMQPPeclQueueConsumer
+=======
+	class AMQPTestCaseNoAckQueueConsumer extends AMQPPeclQueueConsumer
+>>>>>>> 1.0-dovg
 	{
 		protected $checkString = '';
 
@@ -71,6 +74,12 @@
 		{
 			AMQPPeclTest::messageTest($delivery, $this->count);
 
+			//send acknowledge to RabbitMQ
+			$this->getChannel()->basicAck(
+				$delivery->getDeliveryTag(),
+				true
+			);
+			
 			return parent::handleDelivery($delivery);
 		}
 
@@ -84,6 +93,41 @@
 			return;
 		}
 	}
+
+	class AMQPTestCaseAutoAckQueueConsumer extends AMQPPeclQueueConsumer
+	{
+		protected $checkString = '';
+
+		public function handleCancelOk($consumerTag)
+		{
+			$this->checkString .= 'C';
+		}
+
+		public function handleConsumeOk($consumerTag)
+		{
+			$this->checkString .= 'A';
+
+			AMQPPeclTest::checkMessageCount($this->getChannel());
+		}
+
+		public function handleDelivery(AMQPIncomingMessage $delivery)
+		{
+			AMQPPeclTest::messageTest($delivery, $this->count);
+
+			return parent::handleDelivery($delivery);
+		}
+
+		public function getCheckString()
+		{
+			return $this->checkString;
+		}
+
+		public function handleChangeConsumerTag($fromTag, $toTag)
+		{
+			return;
+		}
+	}
+
 
 	class AMQPPeclTest extends TestCase
 	{
@@ -121,6 +165,31 @@
 				'args' => array('x-ha-policy' => 'all')
 			)
 		);
+
+		public function __construct()
+		{
+			parent::__construct();
+
+			if (!extension_loaded('amqp'))
+				return;
+
+			if (!\Onphp\AMQPPool::me()->getList()) {
+				\Onphp\AMQPPool::me()->
+					setDefault(
+						new AMQPPecl(
+							AMQPCredentials::createDefault()->
+							setPort(self::PORT_MIRRORED)
+						)
+					)->
+					addLink(
+						'master',
+						new AMQPPecl(
+							AMQPCredentials::createDefault()
+						)
+					);
+			}
+
+		}
 
 		protected function setUp()
 		{
@@ -443,6 +512,7 @@
 			try {
 				while($mess = $channel->basicGet(self::$queueList['mirrored']['name']))
 					self::messageTest($mess, ++$i);
+				
 			} catch (\Onphp\ObjectNotFoundException $e) {/**/}
 			$this->assertSame(self::COUNT_OF_PUBLISH, $i);
 
@@ -505,6 +575,7 @@
 			$c->disconnect();
 
 			$c = new \Onphp\AMQPPecl(\Onphp\AMQPCredentials::createDefault());
+
 			$channel = $c->createChannel(1);
 
 			$this->exchangeDeclare($channel, 'basic');
@@ -544,6 +615,7 @@
 			$c->disconnect();
 
 			$c = new \Onphp\AMQPPecl(\Onphp\AMQPCredentials::createDefault());
+			
 			$channel = $c->createChannel(1);
 
 			$this->exchangeDeclare($channel, 'basic');
@@ -580,6 +652,7 @@
 				self::$queueList['exchangeBinded']['exchange'],
 				self::$queueList['basic']['key']
 			);
+			
 			$this->assertInstanceOf('\Onphp\AMQPChannelInterface', $channelInterface);
 
 			/**
@@ -687,7 +760,7 @@
 			$this->exchangeDelete($channel, 'exchangeBinded');
 		}
 
-				/**
+		/**
 		 * @param \Onphp\AMQPChannelInterface $channel
 		 * @param bool $check
 		 * @param string $key
@@ -800,7 +873,35 @@
 
 			$channelInterface = $channel->exchangeDelete(
 				self::$queueList[$label]['exchange']
+
 			);
+
+			$this->assertInstanceOf(
+				'AMQPChannelInterface',
+				$channelInterface
+			);
+
+			return $channelInterface;
+		}
+		
+		/**
+		 * @param AMQPChannelInterface $channel
+		 * @param string $label
+		 * @return int
+		 */
+		protected function queueDeclare(AMQPChannelInterface $channel, $label)
+		{
+			$this->assertTrue(isset(self::$queueList[$label]));
+
+			return $channel->queueDeclare(
+				self::$queueList[$label]['name'],
+				AMQPQueueConfig::create()->
+					setDurable(true)->
+					setArguments(
+						self::$queueList[$label]['args']
+					)
+			);
+		}
 
 			$this->assertInstanceOf(
 				'\Onphp\AMQPChannelInterface',
@@ -908,6 +1009,5 @@
 
 			return $channelInterface;
 		}
-
 	}
-?>
+

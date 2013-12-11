@@ -108,7 +108,15 @@
 		{
 			return new PrimitiveClass($name);
 		}
-		
+
+		/**
+		 * @return \Onphp\PrimitiveClassByMethod
+		 **/
+		public static function classByMethod($name)
+		{
+			return new PrimitiveClassByMethod($name);
+		}
+
 		/**
 		 * @return \Onphp\PrimitiveEnumeration
 		**/
@@ -395,6 +403,22 @@
 		public static function enumList($name)
 		{
 			return new PrimitiveEnumList($name);
+		}
+		
+		/**
+		 * @return \Onphp\PrimitivePoint
+		**/
+		public static function point($name)
+		{
+			return new PrimitivePoint($name);
+		}		
+		
+		/**
+		 * @return \Onphp\PrimitivePolygon
+		**/
+		public static function polygon($name)
+		{
+			return new PrimitivePolygon($name);
 		}
 	}
 ?>

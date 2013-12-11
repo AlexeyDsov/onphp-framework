@@ -20,7 +20,7 @@
 				'f' => 'qs34$9&)_@+#qer',
 				'null' => null
 			);
-
+			
 			$test = \Onphp\Hstore::make($array);
 			$test2= \Onphp\Hstore::create($test->toString());
 

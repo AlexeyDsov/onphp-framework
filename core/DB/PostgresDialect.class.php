@@ -67,6 +67,7 @@
 		public function quoteBinary($data)
 		{
 			$esc = pg_escape_bytea($this->getLink(), $data);
+			
 			if (mb_strpos($esc, '\\x') === 0) {
 				// http://www.postgresql.org/docs/9.1/static/datatype-binary.html
 				// if pg_escape_bytea use postgres 9.1+ it's return value like '\x00aabb' (new bytea hex format),
@@ -155,21 +156,58 @@
 		
 		public function quoteIpInRange($range, $ip)
 		{
-			$string = '';
-			
-			if ($ip instanceof DialectString)
-				$string .= $ip->toDialectString($this);
+			if ($range instanceof DBField)
+				$quotedRange = $this->quoteExpression($range);
 			else
-				$string .= $this->quoteValue($ip);
-			
-			$string .= ' <<= ';
-			
-			if ($range instanceof DialectString)
-				$string .= $range->toDialectString($this);
-			else
-				$string .= $this->quoteValue($range);
-			
-			return $string;	
+				$quotedRange = $this->getCastedExpr($range, 'ip4r');
+
+			return 
+				$this->quoteExpression($ip)
+				.' <<= '
+				.$quotedRange;
+		}
+		
+		public function quotePointInPolygon($polygon, $point)
+		{
+			return 
+				$this->getCastedExpr($polygon, 'POLYGON')
+				.' @> '
+				.$this->getCastedExpr($point, 'POINT');
+		}
+		
+		public function quoteDistanceBetweenPoints($left, $right)
+		{
+			return 
+				$this->getCastedExpr($left, 'POINT')
+				.' <-> '
+				.$this->getCastedExpr($right, 'POINT');
+		}
+		
+		public function quoteEqPolygons($left, $right)
+		{
+			return 
+				$this->getCastedExpr($left, 'POLYGON')
+				.' ~= '
+				.$this->getCastedExpr($right, 'POLYGON');			
+		}
+		
+		public function quoteEqPoints($left, $right)
+		{
+			return 
+				$this->getCastedExpr($left, 'POINT')
+				.' ~= '
+				.$this->getCastedExpr($right, 'POINT');			
+		}
+		
+		public function forUpdate($noWait = false)
+		{
+			return
+				' FOR UPDATE '
+				.(
+					$noWait
+						? ' NOWAIT '
+						: null
+				);
 		}
 		
 		protected function makeSequenceName(DBColumn $column)

@@ -1,3 +1,48 @@
+2013-12-06 Evgeny V. Kokovikhin
+	
+	* core/Form/FormUtils.class.php core/OSQL/QuerySkeleton.class.php
+	main/Flow/ModelAndView.class.php main/Utils/ArrayUtils.class.php
+	test/main/Utils/ArrayUtilsTest.class.php: cosmetics and sugar
+
+2013-11-19 Evgeny V. Kokovikhin
+
+	* core/Form/Form.class.php core/Form/FormCollection.class.php 
+	test/core/FormTest.class.php: FormCollection introduced. See usage examples in tests.
+
+2013-11-01 Evgeny V. Kokovikhin
+	
+	* core/Form/Primitives/PrimitiveIdentifierList.class.php: added ability 
+	to ignore wrong values in list of identifier
+
+2013-10-28 Evgeny V. Kokovikhin
+	
+	*  main/Flow/SimpleFrontController.class.php: added SimpleFrontController
+	this is one of the possible way to use FrontController in your application 
+
+2013-10-21 Evgeny V. Kokovikhin
+	
+	* meta/bin/build.php meta/classes/MetaClassPUMLGenerator.class.php
+	meta/classes/MetaConfiguration.class.php:  added schema generator for PlantUML
+	see http://plantuml.sourceforge.net/classes.html
+
+2013-10-17 Nikita V. Konstantinov
+
+	* main/Flow/HttpRequest.class.php
+	* main/Net/Http/HttpHeaderCollection.class.php
+	* test/AllTests.php
+	* test/main/Net/Http/HttpHeaderCollectionTest.class.php:
+		added HttpHeaderCollection
+
+2013-10-15 Nikita V. Konstantinov
+
+	* main/Flow/HttpRequest.class.php:
+		added HttpRequest::createFromGlobals()
+
+2013-03-31  Nikita V. Konstantinov
+
+	* core/Base/Singleton.class.php:
+		Singleton 2+ constructor arguments now without eval
+ 
 2013-04-19 Aleksey S. Denisov
 
 	* core/Cache/CachePeer.class.php
@@ -49,6 +94,15 @@
 	* main/Base/AbstractProtoClass.class.php
 		main/Base/InnerMetaProperty.class.php:
 			InnerMetaProperty (ValueObject) unquoting binary field fix
+
+2012-12-03 Alexander A. Zaytsev
+
+	* core/OSQL/SQLCase.class.php: implementation of SQL CASE expression added.
+
+2013-01-09 Evgeny V. Kokovikhin
+
+	* test/main/Utils/AMQP/AMQPPeclTest.class.php:
+		test fixed
 
 2012-12-06  Evgeny V. Kokovikhin
 
@@ -160,6 +214,25 @@
 		main/Utils/UrlParamsUtils.class.php:
 			allowing curlHttpClient upload files and send post/get arrays with any deep lvl
 
+2012-09-18	Evgeniy Tekalin
+
+	* main/Utils/AMQP/AMQP.class.php,
+	main/Utils/AMQP/AMQPBaseChannel.class.php,
+	main/Utils/AMQP/AMQPBaseMessage.class.php,
+	main/Utils/AMQP/AMQPChannelInterface.class.php,
+	main/Utils/AMQP/AMQPPool.class.php,
+	main/Utils/AMQP/Pecl/AMQPPecl.class.php,
+	main/Utils/AMQP/Pecl/AMQPPeclBaseBitmask.class.php,
+	main/Utils/AMQP/Pecl/AMQPPeclChannel.class.php,
+	main/Utils/AMQP/AMQPInterface.class.php,
+	main/Utils/AMQP/Pecl/AMQPPeclIncomingMessageAdapter.class.php,
+	main/Utils/AMQP/Pecl/AMQPPeclQueueConsumer.class.php,
+	main/Utils/AMQP/AMQPProxyChannel.class.php,
+	main/Utils/AMQP/AMQPSelective.class.php,
+	test/main/Utils/AMQP/AMQPPeclTest.class.php:
+		added support for pecl amqp 1.0.4
+
+
 2012-09-06	Igor V. Gulyaev
 
 	* main/Base/Hstore.class.php
@@ -174,15 +247,11 @@
 	* core/DB/PostgresDialect.class.php:
 		fix incorrect bytea escaping for Postgres 9.1+
 
+
 2012-08-10	Alexey S. Denisov
 
 	* core/Form/Primitives/PrimitiveHstore.class.php:
 		PrimitiveHstore exportValue now return array|null instead Hstore object
-
-2012-08-08	Artem A. Naumenko
-
-	* core/DB/NoSQL/RedisNoSQL.class.php:
-		added campability with old version of redis servers
 
 2012-07-20	Alexey S. Denisov
 
@@ -264,7 +333,7 @@
 
 	moved and updated StorableDAO::unite "properties compare logic" to AbstractProtoClass
 		and (Inner|Light)MetaProperty and covered with tests
-		
+
 2012-06-04	Evgeny M. Stepanov
 
 	* main/Base/Hstore.class.php: fix
@@ -272,12 +341,12 @@
 2012-05-31	Alexey S. Denisov
 
 	* main/DAOs/StorableDAO.class.php: fix merge object with self
-		
+
 2012-05-28	Georgiy T. Kutsurua
 
 	* core/Cache/PeclMemcache.class.php
 		core/Cache/PeclMemcached.class.php
-		core/Cache/{Memcached.class.php → SocketMemcached.class.php}
+		core/Cache/{Memcached.class.php SocketMemcached.class.php}
 		
 	Code clean & add SocketMemcached instead of Memcached
 
@@ -384,7 +453,7 @@
 	* main/Utils/AMQP/AMQPConsumer.class.php,
 	main/Utils/AMQP/AMQPDefaultConsumer.class.php,
 	main/Utils/AMQP/Pecl/AMQPPeclChannel.class.php:
-	handle the change of СonsumerTag implemented.
+	handle the change of ConsumerTag implemented.
 
 2011-11-18	Evgeny V. Kokovikhin
 

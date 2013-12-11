@@ -321,8 +321,12 @@
 			}
 			
 			$headers = array();
-			foreach ($request->getHeaderList() as $headerName => $headerValue) {
-				$headers[] = "{$headerName}: $headerValue";
+			foreach ($request->getHeaderList() as $headerName => $dummy) {
+				if (is_array($request->getHeaderVar($headerName))) {
+					foreach ($request->getHeaderVar($headerName) as $value)
+						$headers[] = "{$headerName}: $value";
+				} else
+					$headers[] = "{$headerName}: {$request->getHeaderVar($headerName)}";
 			}
 			
 			if ($headers) {

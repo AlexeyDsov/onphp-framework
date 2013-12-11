@@ -49,6 +49,7 @@
 		
 		/**
 		 * @return \Onphp\BinaryExpression
+		 * @return BinaryExpression
 		 */
 		public static function create($left, $right, $logic)
 		{

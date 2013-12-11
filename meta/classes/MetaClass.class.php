@@ -35,6 +35,8 @@
 		private $strategy	= null;
 		
 		private $build		= true;
+
+		private $fromSlave  = false;
 		
 		public function __construct($name, $namespace = null)
 		{
@@ -135,6 +137,21 @@
 		{
 			$this->parent = $parent;
 			
+			return $this;
+		}
+
+		public function isFromSlave()
+		{
+			return $this->fromSlave;
+		}
+
+		/*
+		 * @return MetaClass
+		 */
+		public function setFromSlave($isFromSlave)
+		{
+			$this->fromSlave = ($isFromSlave === true);
+
 			return $this;
 		}
 		

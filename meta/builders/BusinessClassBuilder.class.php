@@ -34,7 +34,7 @@
 				$class->getPattern()->daoExists()
 				&& (!$class->getPattern() instanceof AbstractClassPattern)
 			) {
-				$interfaces .= ', \Onphp\DAOConnected';
+				$interfaces = ' implements \Onphp\PrototypedDAOConnected';
 			}
 
 			$out .= <<<EOT

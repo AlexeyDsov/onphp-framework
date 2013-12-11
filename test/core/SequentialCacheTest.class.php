@@ -29,6 +29,20 @@
 
 			$cache = new \Onphp\SequentialCache($deadPeer, array($slave1, $slave2, $alifePeer));
 
+			$alifePeer = new \Onphp\PeclMemcached("127.0.0.1", "11211"); //some existing memcached
+			$alifePeer->set('some_key', 'some_value');
+			
+			$deadPeer = new \Onphp\SocketMemcached("165.42.42.42", "11211"); //some not existing memcache
+			
+			$slave1 = new \Onphp\PeclMemcached("35.143.65.241", "11211"); //some not existing memcache
+
+			$slave2 =
+				\Onphp\AggregateCache::create()->
+				addPeer('dead', new \Onphp\PeclMemcached("165.34.176.221", "11211"))-> //some not existing memcache
+				addPeer('dead_too', new \Onphp\PeclMemcached("165.34.176.222", "11211")); //some not existing memcache
+
+			$cache = new \Onphp\SequentialCache($deadPeer, array($slave1, $slave2, $alifePeer));
+
 			$result = $cache->get("some_key");
 
 			$this->assertEquals($result, 'some_value');

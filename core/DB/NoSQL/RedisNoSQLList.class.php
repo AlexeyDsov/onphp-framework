@@ -10,7 +10,7 @@
 	***************************************************************************/
 
 	namespace Onphp;
-
+	
 	final class RedisNoSQLList implements Listable
 	{
 		private $redis		= null;
@@ -27,7 +27,7 @@
 		
 		/**
 		 * @param mixed $value
-		 * @return RedisList
+		 * @return RedisList 
 		 */
 		public function append($value)
 		{
@@ -41,7 +41,7 @@
 		
 		/**
 		 * @param mixed $value
-		 * @return RedisList
+		 * @return RedisList 
 		 */
 		public function prepend($value)
 		{
@@ -54,7 +54,7 @@
 		}
 		
 		/**
-		 * @return RedisList
+		 * @return RedisList 
 		 */
 		public function clear()
 		{

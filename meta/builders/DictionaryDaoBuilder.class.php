@@ -29,6 +29,13 @@ abstract class {$class->getName('Auto', 'DAO')} extends \Onphp\StorableDAO
 
 EOT;
 
+			if ($class->isFromSlave())
+				$out .= <<<EOT
+	protected \$useSlave = true;
+
+
+EOT;
+
 			$pointers = self::buildPointers($class);
 			
 			$out .= <<<EOT

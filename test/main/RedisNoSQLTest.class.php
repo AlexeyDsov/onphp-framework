@@ -8,9 +8,9 @@
 	*   License, or (at your option) any later version.                       *
 	*                                                                         *
 	***************************************************************************/
-	
-	namespace Onphp\Test;
 
+	namespace Onphp\Test;
+	
 	final class RedisNoSQLTest extends TestCase
 	{
 		public function setUp()
@@ -47,6 +47,7 @@
 		public function testList()
 		{
 			$redis	= new \Onphp\RedisNoSQL('localhost', 6379);
+			
 			$redis->delete('list');
 			
 			$list	= $redis->fetchList('list');
@@ -63,6 +64,7 @@
 		public function testListIterator()
 		{
 			$redis	= new \Onphp\RedisNoSQL('localhost', 6379);
+			
 			$redis->delete('list');
 			
 			$list	= $redis->fetchList('list');
@@ -83,6 +85,7 @@
 		public function testListArrayAccess()
 		{
 			$redis	= new \Onphp\RedisNoSQL('localhost', 6379);
+			
 			$redis->delete('list');
 			
 			$list	= $redis->fetchList('list');
@@ -97,6 +100,7 @@
 		public function testListTrim()
 		{
 			$redis	= new \Onphp\RedisNoSQL('localhost', 6379);
+			
 			$redis->delete('list');
 			
 			$list	= $redis->fetchList('list');
@@ -117,6 +121,7 @@
 		public function testListClean()
 		{
 			$redis	= new \Onphp\RedisNoSQL('localhost', 6379);
+			
 			$redis->delete('list');
 			
 			$list	= $redis->fetchList('list');
