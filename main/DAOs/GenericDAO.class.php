@@ -434,13 +434,26 @@
 		
 		private function addObjectToMap(Identifiable $object)
 		{
+			if ($object instanceof IdentifiableObject) {
+				$id = $object->_getId();
+				if ($id instanceof Identifier && !$id->isFinalized()) {
+					$id->finalize();
+				}
+			}
 			return $this->identityMap[$object->getId()] = $object;
 		}
 		
 		private function addObjectListToMap($list)
 		{
-			foreach ($list as $object)
+			foreach ($list as $object) {
+				if ($object instanceof IdentifiableObject) {
+					$id = $object->_getId();
+					if ($id instanceof Identifier && !$id->isFinalized()) {
+						$id->finalize();
+					}
+				}
 				$this->identityMap[$object->getId()] = $object;
+			}
 			
 			return $list;
 		}

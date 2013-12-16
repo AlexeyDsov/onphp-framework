@@ -26,6 +26,8 @@
 			
 			if ($value instanceof Identifier && !$value->isFinalized())
 				return 'null';
+			elseif ($value instanceof Identifier)
+				$value = $value->getId();
 			
 			if (Assert::checkInteger($value))
 				return $value;

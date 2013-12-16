@@ -44,6 +44,13 @@
 		
 		public function quoteValue($value)
 		{
+			if ($value instanceof Identifier) {
+				if (!$value->isFinalized()) {
+					return $value;
+				} else {
+					$value = $value->getId();
+				}
+			}
 			return $value;
 		}
 		

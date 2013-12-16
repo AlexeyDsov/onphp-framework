@@ -53,6 +53,8 @@
 		
 		abstract public function connect();
 		abstract public function disconnect();
+
+		abstract public function obtainSequence($sequence);
 		
 		abstract public function getTableInfo($table);
 

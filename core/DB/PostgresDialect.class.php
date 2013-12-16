@@ -40,6 +40,13 @@
 		
 		public function quoteValue($value)
 		{
+			if ($value instanceof Identifier) {
+				if (!$value->isFinalized()) {
+					return "''";
+				} else {
+					$value = $value->getId();
+				}
+			}
 			return "'".pg_escape_string($this->getLink(), $value)."'";
 		}
 		

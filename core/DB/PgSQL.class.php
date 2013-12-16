@@ -77,7 +77,7 @@
 			$res = $this->queryRaw("select nextval('{$sequence}') as seq");
 			$row = pg_fetch_assoc($res);
 			pg_free_result($res);
-			return $row['seq'];
+			return Identifier::wrap($row['seq'])->finalize();
 		}
 		
 		/**

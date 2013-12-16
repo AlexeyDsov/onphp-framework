@@ -27,6 +27,8 @@
 			
 			if ($value instanceof Identifier && !$value->isFinalized())
 				return "''"; // instead of 'null', to be compatible with v. 4
+			elseif ($value instanceof Identifier)
+				$value = $value->getId();
 			
 			return
 				"'"

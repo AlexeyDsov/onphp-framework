@@ -46,9 +46,7 @@
 		
 		final public function query(Query $query)
 		{
-			$result = $this->queryRaw(
-				$query->toDialectString($this->getDialect())
-			);
+			$result = parent::query($query);
 			
 			if (
 				($query instanceof InsertQuery)

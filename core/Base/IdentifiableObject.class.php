@@ -32,16 +32,23 @@
 			
 			return $io->setId($id);
 		}
+
+		public function _getId()
+		{
+			if ($this->id === null) {
+				$this->id = Identifier::create()->
+					setObject($this);
+			}
+			return $this->id;
+		}
 		
 		public function getId()
 		{
-			if (
-				$this->id instanceof Identifier
-				&& $this->id->isFinalized()
-			)
-				return $this->id->getId();
-			else
-				return $this->id;
+			$id = $this->_getId();
+			if ($id instanceof Identifier) {
+				return $id->isFinalized() ? $id->getId() : null;
+			}
+			return $id;
 		}
 		
 		/**
@@ -49,7 +56,17 @@
 		**/
 		public function setId($id)
 		{
-			$this->id = $id;
+			if ($this->id instanceof Identifier) {
+				if ($id instanceof Identifier) {
+					$oldId = $this->id;
+					$oldId->setProxy($id);
+					$this->id = $id;
+				} else {
+					$this->id->setId($id);
+				}
+			} else {
+				$this->id = $id;
+			}
 			
 			return $this;
 		}

@@ -132,7 +132,10 @@
 		{
 			return self::fetchEncapsulants($object);
 		}
-		
+
+		/**
+		 * @return LightMetaProperty[]
+		 */
 		final public function getPropertyList()
 		{
 			static $lists = array();
@@ -228,7 +231,7 @@
 					);
 				}
 			}
-			
+
 			foreach ($this->getPropertyList() as $property) {
 				$property->fillQuery($query, $object, $old);
 			}
@@ -371,12 +374,13 @@
 					if (($inner = $object->$getter()) instanceof DAOConnected) {
 						if ($proto->depth)
 							$proto->storage[$proto->depth][$setter][] = $inner;
-						else
+						else {
 							$object->$setter(
 								$inner->dao()->getById(
 									$inner->getId()
 								)
 							);
+						}
 					} elseif (
 						$proto->depth
 						// emulating 'instanceof DAOConnected'

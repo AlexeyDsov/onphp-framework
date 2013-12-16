@@ -106,10 +106,20 @@ EOT;
 							$property->getType()->getClass()->getPattern() instanceof EnumerationClassPattern
 							|| $property->getType()->getClass()->getPattern() instanceof EnumClassPattern
 						);
-					
-					$fetchObjectString = $isEnumeration
-						? "new {$className}(\$this->{$name}Id)"
-						: "{$className}::dao()->getById(\$this->{$name}Id)";
+
+					if ($isEnumeration) {
+						$returnObjectString = "return new {$className}(\$this->{$name}Id)";
+					} else {
+						$returnObjectString = <<<EOT
+if (\$this->{$name}Id instanceOf \Onphp\Identifier) {
+	if (!\$this->{$name}Id->isFinalized()) {
+		return \$this->{$name}Id->getObject();
+	}
+	\$this->{$name}Id = \$this->{$name}Id->getId();
+}
+return {$className}::dao()->getById(\$this->{$name}Id);
+EOT;
+					}
 					
 					$method = <<<EOT
 
@@ -117,7 +127,7 @@ EOT;
 public function {$methodName}()
 {
 	if (\$this->{$name}Id !== null) {
-		return {$fetchObjectString};
+		{$returnObjectString};
 	}
 	
 	return null;
@@ -230,7 +240,7 @@ EOT;
 **/
 public function {$methodName}({$this->getClass()->getFullClassName()} \${$name}{$defaultValue})
 {
-	\$this->{$name}Id = \${$name}->getId() ? \${$name}->getId() : null;
+	\$this->{$name}Id = \${$name}->_getId() ?: null;
 
 	return \$this;
 }
